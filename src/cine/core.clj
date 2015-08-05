@@ -40,13 +40,15 @@
                              (enlive/select [enlive/root :> [:div (enlive/nth-of-type 1)]])
                              (enlive/select [enlive/root :> [:div]])))
 
+(defn extract-date-markup [single-schedule-markup]
+  (apply enlive/text 
+         (enlive/select 
+           (enlive/select single-schedule-markup 
+                          [enlive/root :> [:table (enlive/nth-of-type 1)]]) [:div])))
 
 
-(defn extract-date [schedule-markup-list]
-  (let [date-in-string (apply enlive/text 
-                              (enlive/select 
-                                (enlive/select schedule-markup-list 
-                                               [enlive/root :> [:table (enlive/nth-of-type 1)]]) [:div]))
+(defn extract-date [single-schedule-markup]
+  (let [date-in-string (extract-date-markup single-schedule-markup)
         date-fmt (str/split date-in-string #",")
         week-day (str/trim (first date-fmt))
         monthly-date (str/split (str/trim (second date-fmt)) #" ")
@@ -58,6 +60,8 @@
      :date date
      :year year}))
 
+
+
 (defn extract-movielist-from-schedule 
   "Extracts movies from a schedule day"
   [single-schedule-markup]
@@ -67,17 +71,30 @@
                                    (map #(enlive/select % [:a]))
                                    (flatten)))))
 
-(def one (first schedules-root-divs))
+(defn extract-timeschedule-from-schedule 
+  "Extracts movie start and end times from a schedule day"
+  [single-schedule-markup]
+  (partition 5 (flatten (map #(:content %) (->> (->  single-schedule-markup
+                                       (enlive/select [enlive/root :> [:table (enlive/nth-of-type 2)]])
+                                       (enlive/select [enlive/root :> [:tr]]))
+                                   (map #(enlive/select % [:td.time]))
+                                   (flatten))))))
 
-(flatten (map #(:content %) (->> (->  one
-         (enlive/select [enlive/root :> [:table (enlive/nth-of-type 2)]])
-         (enlive/select [enlive/root :> [:tr]]))
-     (map #(enlive/select % [:td.time]))
-     (flatten))))
+(defn make-single-movie-schedule-wo-date [single-schedule-markup]
+  (let [movielist (extract-movielist-from-schedule single-schedule-markup)
+        timelist (extract-timeschedule-from-schedule single-schedule-markup)]
+    (map #(assoc {} :name %1 :schedule %2) movielist timelist)))
+
+(defn make-single-movie-schedule [single-schedule-markup]
+  (let [date-map (extract-date single-schedule-markup)
+        date-str (str (:date date-map) "/" (:month date-map) "/" (:year date-map))
+        mov-schedule (make-single-movie-schedule-wo-date single-schedule-markup)]
+    (map #(assoc % :date date-str) mov-schedule)))
+(make-single-movie-schedule one)
+
+(map make-single-movie-schedule schedules-root-divs)
 
 
-
-(extract-date one)
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
