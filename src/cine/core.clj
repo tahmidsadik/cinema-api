@@ -4,13 +4,14 @@
             [cine.utils :refer [month-to-num]])
   (:gen-class))
 
+(defn fetch-url [url]
+  (enlive/html-resource (java.net.URL. url)))
+
 (def cinehub-url "http://w3.cineplexbd.com/~ab46419/cineplexbd/index.php")
 (def schedule-url "http://w3.cineplexbd.com/~ab46419/cineplexbd/index.php?visit=schedule/schedules&a=1")
 (def movie-list-markup (fetch-url cinehub-url))
 (def schedule-markup (fetch-url schedule-url))
 
-(defn fetch-url [url]
-  (enlive/html-resource (java.net.URL. url)))
 
 (defn get-current-movies 
   "Returns a list of movies that are being aired now" 
@@ -90,10 +91,9 @@
         date-str (str (:date date-map) "/" (:month date-map) "/" (:year date-map))
         mov-schedule (make-single-movie-schedule-wo-date single-schedule-markup)]
     (map #(assoc % :date date-str) mov-schedule)))
-(make-single-movie-schedule one)
 
-(map make-single-movie-schedule schedules-root-divs)
-
+(defn get-weekly-movie-schedule []
+  (map make-single-movie-schedule schedules-root-divs))
 
 (defn -main
   "I don't do a whole lot ... yet."
