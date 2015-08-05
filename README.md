@@ -1,33 +1,12 @@
-# cine
+# Cinema API 
 
-FIXME: description
+Provides the current movies and upcoming movies that are being shown in Cineplex BD and Blockbuster Cinema as an API.
+The project is in very early stage and currently only shows the movies from cineplex for now.
 
 ## Installation
-
-Download from http://example.com/FIXME.
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar cine-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
+    You can play with things in the repl. Try `lein repl` and then `(get-current-movies)` and
+    `(get-upcoming-movies)`.
+    
 ## License
 
 Copyright © 2015 FIXME
