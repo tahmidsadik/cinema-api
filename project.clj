@@ -12,7 +12,9 @@
                  [ring/ring-defaults "0.1.5"]
                  [ring/ring-json "0.4.0"]
                  [ring/ring-core "1.4.0"]
-                 [hiccup "1.0.5"]]
-  :main ^:skip-aot cine.core
+                 [hiccup "1.0.5"]
+                 [ring/ring-devel "1.4.0"]]
+  :main ^:skip-aot cine.server
   :target-path "target/%s"
+  :min-lein-version "2.0.0"
   :profiles {:uberjar {:aot :all}})
