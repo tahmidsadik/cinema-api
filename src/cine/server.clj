@@ -34,8 +34,8 @@
   (-> app-routes
       (wrap-defaults site-defaults)))
 
-(defn main
+(defn -main
   "Main Entry point of the app"
   []
-  (run-dmc app {:host "localhost" :port 9003}))
+  (run app {:host "localhost" :port 9003}))
 
