@@ -47,7 +47,6 @@
            (enlive/select single-schedule-markup 
                           [enlive/root :> [:table (enlive/nth-of-type 1)]]) [:div])))
 
-
 (defn extract-date [single-schedule-markup]
   (let [date-in-string (extract-date-markup single-schedule-markup)
         date-fmt (str/split date-in-string #",")
@@ -60,8 +59,6 @@
      :month (str month)
      :date date
      :year year}))
-
-
 
 (defn extract-movielist-from-schedule 
   "Extracts movies from a schedule day"

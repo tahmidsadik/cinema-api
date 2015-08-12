@@ -2,10 +2,40 @@
   (:require [clojure.string :as str]
             [compojure.core :refer :all]
             [compojure.route :as route]
-            [immutant.web :refer :all]))
+            [immutant.web :refer :all]
+            [hiccup.core :as h]
+            [ring.middleware.defaults :refer :all]
+            [cheshire.core :as cheshire ]
+            [cine.core :as cine]))
 
-(defroutes routes
-  (GET "/" [] "HELLO WORLDJ")
+(defn current-movie-list-handler [req]
+  {:status 200
+   :headers {"Content-type" "text"}
+   :body (cheshire/generate-string (cine/get-current-movies))})
+
+(defn upcoming-movie-list-handler [req]
+  {:status 200
+   :headers {"Content-type" "text"}
+   :body (cheshire/generate-string (cine/get-upcoming-movies))})
+
+(defn cine-schedule-handler [req]
+  {:status 200
+   :headers {"Content-type" "text"}
+   :body (cheshire/generate-string (cine/get-weekly-movie-schedule))})
+
+(defroutes app-routes
+  (GET "/" [] "Hello World")
+  (GET "/current-cinehub-movies" [] current-movie-list-handler)
+  (GET "/upcoming-cinehub-movies" [] upcoming-movie-list-handler)
+  (GET "/cinehub-schedule" [] cine-schedule-handler)
   (route/not-found "404 Not found"))
 
+(def app
+  (-> app-routes
+      (wrap-defaults site-defaults)))
+
+(defn main
+  "Main Entry point of the app"
+  []
+  (run-dmc app {:host "localhost" :port 9003}))
 
