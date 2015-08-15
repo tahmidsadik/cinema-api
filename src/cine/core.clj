@@ -1,8 +1,7 @@
 (ns cine.core
   (:require [net.cgrand.enlive-html :as enlive]
             [clojure.string :as str]
-            [cine.utils :refer [month-to-num]])
-  (:gen-class))
+            [cine.utils :refer [month-to-num]]))
 
 (defn fetch-url [url]
   (enlive/html-resource (java.net.URL. url)))
@@ -91,8 +90,3 @@
 
 (defn get-weekly-movie-schedule []
   (map make-single-movie-schedule schedules-root-divs))
-
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))

@@ -6,7 +6,8 @@
             [hiccup.core :as h]
             [ring.middleware.defaults :refer :all]
             [cheshire.core :as cheshire ]
-            [cine.core :as cine]))
+            [cine.core :as cine])
+  (:gen-class))
 
 (defn current-movie-list-handler [req]
   {:status 200

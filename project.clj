@@ -1,5 +1,5 @@
-(defproject cine "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
+(defproject cine "0.1"
+  :description "Cineplex Movie Schedules as a Service"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -17,4 +17,5 @@
   :main ^:skip-aot cine.server
   :target-path "target/%s"
   :min-lein-version "2.0.0"
+  :uberjar-name "cine-buddy.jar"
   :profiles {:uberjar {:aot :all}})
