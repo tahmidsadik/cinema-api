@@ -1,1 +1,1 @@
-web: java -cp target/cine-buddy.jar clojure.main -m cine.server
+web: java -cp target/uberjar/cine-buddy.jar clojure.main -m cine.server
