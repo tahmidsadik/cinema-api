@@ -38,7 +38,7 @@
 (defn -main
   "Starting the immutant server"
   []
-  (let [PORT (Integer . (or (System/getenv "PORT") "8080"))]  ;; getting PORT number form env-variable $PORT 
+  (let [PORT (Integer/parseInt (or (System/getenv "PORT") "9003"))]  ;; getting PORT number form env-variable $PORT 
                                                               ;;for deploying to heroku
     (run app {:host "localhost" :port PORT})))
 
