@@ -36,7 +36,9 @@
       (wrap-defaults site-defaults)))
 
 (defn -main
-  "Main Entry point of the app"
+  "Starting the immutant server"
   []
-  (run app {:host "localhost" :port 9003}))
+  (let [PORT (Integer . (or (System/getenv "PORT") "8080"))]  ;; getting PORT number form env-variable $PORT 
+                                                              ;;for deploying to heroku
+    (run app {:host "localhost" :port PORT})))
 
