@@ -1,6 +1,5 @@
 (ns cine.utils
-  (:require [clojure.string :as str])
-  (:gen-class))
+  (:require [clojure.string :as str]))
 
 (defn month-to-num [^String month]
   (let [month-db {:january 1
