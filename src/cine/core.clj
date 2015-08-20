@@ -23,6 +23,10 @@
     (map #(:content %))
     (flatten)))
 
+(defn mapify-current-movies 
+  "Returns current movies in a map e.g. {:name 'MI5'}"
+  (map #(assoc {} :name %1) (get-current-movies)))
+
 (defn get-upcoming-movies 
   "Returns a list of upcoming movies" 
   []
