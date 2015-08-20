@@ -18,7 +18,7 @@
 (defn current-movie-list-handler [req]
   {:status 200
    :headers {"Content-type" "text"}
-   :body (cheshire/generate-string (cine/get-current-movies))})
+   :body (cheshire/generate-string (cine/mapify-current-movies))})
 
 (defn upcoming-movie-list-handler [req]
   {:status 200
