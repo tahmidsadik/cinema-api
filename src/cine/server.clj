@@ -10,11 +10,6 @@
             [cine.core :as cine])
   (:gen-class))
 
-(defn favicon-handler [req]
-  {:status 200
-   :headers {"Content-type" "image/x-icon"}
-   :body (io/reader (io/resource "public/favicon.ico"))})
-
 (defn current-movie-list-handler [req]
   {:status 200
    :headers {"Content-type" "text"}
@@ -35,7 +30,6 @@
   (GET "/current-cinehub-movies" [] current-movie-list-handler)
   (GET "/upcoming-cinehub-movies" [] upcoming-movie-list-handler)
   (GET "/cinehub-schedule" [] cine-schedule-handler)
-  (GET "/favicon.ico" [] favicon-handler)
   (route/not-found "404 Not found"))
 
 (def app
