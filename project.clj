@@ -13,9 +13,9 @@
                  [ring/ring-json "0.4.0"]
                  [ring/ring-core "1.4.0"]
                  [hiccup "1.0.5"]
-                 [clj-http "2.0.0"]
                  [ring/ring-devel "1.4.0"]
-                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]]
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [http-kit "2.1.19"]]
   :main ^:skip-aot cine.server
   :target-path "target/%s"
   :min-lein-version "2.0.0"
