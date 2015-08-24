@@ -17,42 +17,32 @@
     (assoc mov :3d true)
     (assoc mov :3d false)))
 
-(defn strip-x-from-name 
+(defn strip-x
   "Strips 'x' from name where 'x' is a string or char-sequence or regexp"
-  [mov x]
-  (str/replace mov x ""))
+  [string x]
+  (str/replace string x ""))
 
 (defn list-movies []
   (->> (cine/mapify-current-movies)
        (map add-3d-info)
-       (map #(assoc % :name (strip-x-from-name (:name %) "(3D)")))
-       (map #(assoc % :name (strip-x-from-name (:name %) "(2D)")))
+       (map #(assoc % :name (-> (:name %) 
+                                (strip-x "(3D)")
+                                (strip-x "(2D)"))))
        (map #(assoc % :imdb-name (-> (:name %)
                                      (str/trim)
                                      (str/replace "-" "")
                                      (str/replace "  " " ")
-                                     (str/replace " " "+"))))
-       ;; (map #(assoc % :imdb-name (str/replace 
-       ;;                             (str/replace 
-       ;;                               (str/trim (:name %)) "-" "") " " "+")))
-       ))
-
-(list-movies)
+                                     (str/replace " " "+"))))))
 
 (defn http-get [url]
   (let [c (a/chan)]
     (http/get url #(a/put! c %))
     c))
 
-(time (dotimes [n 10]
-        (<!! (http-get "http://www.omdbapi.com?t=Selma"))))
 (time (let [chans (doall (for [x (list-movies)]
-                           (http-get (str "http://www.omdbapi.com/?t=" (:name x)))))]
+                           (http-get (str "http://www.omdbapi.com/?t=" (:imdb-name x)))))]
         (for [c chans]
-          (<!! c))))
-
-
-(time (doall (pmap #(client/get (str "http://www.omdbapi.com/?t=" (:name %))) (list-movies))))
+          (get (cheshire/parse-string (:body (<!! c))) "Title"))))
 
 (defn current-movie-list-handler [req]
   {:status 200
