@@ -12,6 +12,11 @@
             [cine.core :as cine])
   (:gen-class))
 
+(defn http-get [url]
+  (let [c (a/chan)]
+    (http/get url #(a/put! c %))
+    c))
+
 (defn add-3d-info [mov]
   (if (.contains (str/lower-case (:name mov)) "3d")
     (assoc mov :3d true)
@@ -22,8 +27,10 @@
   [string x]
   (str/replace string x ""))
 
-(defn list-movies []
-  (->> (cine/mapify-current-movies)
+(defn list-movies
+  "Takes a list of current of upcoming movies and organizes them in a map."
+  [lst]
+  (->> lst
        (map add-3d-info)
        (map #(assoc % :name (-> (:name %) 
                                 (strip-x "(3D)")
@@ -34,25 +41,30 @@
                                      (str/replace "  " " ")
                                      (str/replace " " "+"))))))
 
-(defn http-get [url]
-  (let [c (a/chan)]
-    (http/get url #(a/put! c %))
-    c))
+(defn list-current-movies []
+  (list-movies (cine/mapify-current-movies)))
 
-(time (let [chans (doall (for [x (list-movies)]
-                           (http-get (str "http://www.omdbapi.com/?t=" (:imdb-name x)))))]
-        (for [c chans]
-          (get (cheshire/parse-string (:body (<!! c))) "Title"))))
+(defn list-upcoming-movies []
+  (list-movies (cine/mapify-upcoming-movies)))
+
+(defn get-imdb-info [mov-name] 
+  (http-get (str "http://www.omdbapi.com/?t=" mov-name)))
 
 (defn current-movie-list-handler [req]
   {:status 200
    :headers {"Content-type" "text"}
-   :body (cheshire/generate-string (cine/mapify-current-movies))})
+   :body (let [mov-list-chan (map #(assoc % :imdb-chan (get-imdb-info (:imdb-name %))) (list-current-movies))
+               mov-list (map #(do 
+                                (assoc % :imdb-info (cheshire/parse-string (:body (<!! (:imdb-chan %)))))
+                                (dissoc % :imdb-chan)) mov-list-chan)] 
+           (cheshire/generate-string mov-list))})
+
 
 (defn upcoming-movie-list-handler [req]
   {:status 200
    :headers {"Content-type" "text"}
-   :body (cheshire/generate-string (cine/get-upcoming-movies))})
+   :body (cheshire/generate-string (let [mov-list (list-upcoming-movies)] 
+                                     (assoc mov-list :imdb-info (get-imdb-info mov-list))))})
 
 (defn cine-schedule-handler [req]
   {:status 200
@@ -74,5 +86,6 @@
   "Starting the immutant server"
   []
   (let [PORT (Integer/parseInt (or (System/getenv "PORT") "9003"))]  ;; getting PORT number form env-variable $PORT for deploying to heroku
-    (run app {:host "0.0.0.0" :port PORT})))
+    (run-dmc app {:host "0.0.0.0" :port PORT})))
 
+(-main)
