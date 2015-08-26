@@ -11,7 +11,6 @@
 (def movie-list-markup (fetch-url cinehub-url))
 (def schedule-markup (fetch-url schedule-url))
 
-
 (defn get-current-movies 
   "Returns a list of movies that are being aired now" 
   []
@@ -38,6 +37,11 @@
         (enlive/select [:a]))
     (map #(:content %))
     (flatten)))
+
+(defn mapify-upcoming-movies
+  "Returns upcoming movies in a map e.g. {:name 'MI5'}"
+  []
+  (map #(assoc {} :name %1) (get-upcoming-movies)))
 
 (def schedules-root-divs (-> schedule-markup 
                              (enlive/select [:div#main_body :> [:div (enlive/nth-of-type 2)]])
