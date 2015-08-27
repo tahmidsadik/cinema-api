@@ -53,18 +53,18 @@
 (defn current-movie-list-handler [req]
   {:status 200
    :headers {"Content-type" "text"}
-   :body (let [mov-list-chan (map #(assoc % :imdb-chan (get-imdb-info (:imdb-name %))) (list-current-movies))
-               mov-list (map #(do 
-                                (assoc % :imdb-info (cheshire/parse-string (:body (<!! (:imdb-chan %)))))
-                                (dissoc % :imdb-chan)) mov-list-chan)] 
-           (cheshire/generate-string mov-list))})
-
+   :body (cheshire/generate-string (->> (list-current-movies)
+                                        (map #(assoc % :imdb-chan (get-imdb-info (:imdb-name %))))
+                                        (map #(assoc % :imdb-info (cheshire/parse-string (:body (<!! (:imdb-chan %))))))
+                                        (map #(dissoc % :imdb-chan))))})
 
 (defn upcoming-movie-list-handler [req]
   {:status 200
    :headers {"Content-type" "text"}
-   :body (cheshire/generate-string (let [mov-list (list-upcoming-movies)] 
-                                     (assoc mov-list :imdb-info (get-imdb-info mov-list))))})
+   :body (cheshire/generate-string (->> (list-upcoming-movies)
+                                        (map #(assoc % :imdb-chan (get-imdb-info (:imdb-name %))))
+                                        (map #(assoc % :imdb-info (cheshire/parse-string (:body (<!! (:imdb-chan %))))))
+                                        (map #(dissoc % :imdb-chan))))})
 
 (defn cine-schedule-handler [req]
   {:status 200
@@ -73,9 +73,9 @@
 
 (defroutes app-routes
   (GET "/" [] "Hello World")
-  (GET "/current-cinehub-movies" [] current-movie-list-handler)
-  (GET "/upcoming-cinehub-movies" [] upcoming-movie-list-handler)
-  (GET "/cinehub-schedule" [] cine-schedule-handler)
+  (GET "/cineplex/current" [] current-movie-list-handler)
+  (GET "/cineplex/upcoming" [] upcoming-movie-list-handler)
+  (GET "/cineplex/schedule" [] cine-schedule-handler)
   (route/not-found "404 Not found"))
 
 (def app
@@ -88,4 +88,3 @@
   (let [PORT (Integer/parseInt (or (System/getenv "PORT") "9003"))]  ;; getting PORT number form env-variable $PORT for deploying to heroku
     (run-dmc app {:host "0.0.0.0" :port PORT})))
 
-(-main)
