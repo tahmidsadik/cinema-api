@@ -46,7 +46,6 @@
 (def schedules-root-divs (-> schedule-markup 
                              (enlive/select [:div#main_body :> [:div (enlive/nth-of-type 2)]])
                              (enlive/select [enlive/root :>  [:div (enlive/nth-of-type 2)]])
-                             (enlive/select [enlive/root :> [:div (enlive/nth-of-type 1)]])
                              (enlive/select [enlive/root :> [:div]])))
 
 (defn extract-date-markup [single-schedule-markup]
@@ -86,6 +85,7 @@
                                    (map #(enlive/select % [:td.time]))
                                    (flatten))))))
 
+
 (defn make-single-movie-schedule-wo-date [single-schedule-markup]
   (let [movielist (extract-movielist-from-schedule single-schedule-markup)
         timelist (extract-timeschedule-from-schedule single-schedule-markup)]
@@ -99,3 +99,38 @@
 
 (defn get-weekly-movie-schedule []
   (map make-single-movie-schedule schedules-root-divs))
+
+
+;; (def url-list ["http://www.sjjcc.org/event/tuesday-lectures-2/2015-09-01",
+;;                "http://www.sjjcc.org/event/calm-your-spirit/2015-09-01",
+;;                "http://www.sjjcc.org/event/its-a-knitzvah/2015-09-02",
+;;                "http://www.sjjcc.org/event/in2-it-fitness-with-rhonda-johnson/2015-09-02",
+;;                "http://www.sjjcc.org/event/conversational-hebrew-ulpan-advanced-2/2015-09-02",
+;;                "http://www.sjjcc.org/event/taste-of-torah/2015-09-02",
+;;                "http://www.sjjcc.org/event/conversational-hebrew-ulpan-intermediate-2/2015-09-02",
+;;                "http://www.sjjcc.org/event/conversational-hebrew-ulpan-advanced-beginners-2/2015-09-03"])
+;;
+;; (def markup-list (doall (map #(fetch-url %) url-list)))
+;;
+;; (->> markup-list
+;;      (map #(enlive/select % [:div.tribe-events-schedule :span.date-start :span.value-title]))
+;;      (flatten)
+;;      (map #(:title (:attrs %))))
+;;
+;; (first markup-list)
+;;
+;;
+;;
+;; (def schedules-root-divs (-> schedule-markup 
+;;                              (enlive/select [:div#main_body :> [:div (enlive/nth-of-type 2)]])
+;;                              (enlive/select [enlive/root :>  [:div (enlive/nth-of-type 2)]])
+;;                              (enlive/select [enlive/root :> [:div (enlive/nth-of-type 1)]])
+;;                              (enlive/select [enlive/root :> [:div]])))
+;;
+;; (def schedules (-> schedule-markup
+;;     (enlive/select [:div#main_body :> [:div (enlive/nth-of-type 2)]])
+;;     (enlive/select [enlive/root :>  [:div (enlive/nth-of-type 2)]])
+;;     (enlive/select [enlive/root :> [:div ]])
+;;     ;; (enlive/select [enlive/root :> [:div]])
+;; ))
+;;
