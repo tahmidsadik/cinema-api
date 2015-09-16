@@ -3,6 +3,7 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :plugins [[lein-cljsbuild "1.1.0"]]
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.107"]
                  [reagent "0.5.1-rc"]
@@ -19,6 +20,13 @@
                  [ring/ring-devel "1.4.0"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [http-kit "2.1.19"]]
+
+  :cljsbuild {
+              :builds [
+                       {:source-paths ["src"]
+                        :compiler {:output-to "resources/public/js/app.js"
+                                   :optimizations :none}}]}
+
   :main ^:skip-aot cine.server
   :target-path "target/%s"
   :min-lein-version "2.0.0"
