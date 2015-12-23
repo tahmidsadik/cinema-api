@@ -6,8 +6,8 @@
 (defn fetch-url [url]
   (enlive/html-resource (java.net.URL. url)))
 
-(def cinehub-url "http://w3.cineplexbd.com/~ab46419/cineplexbd/index.php")
-(def schedule-url "http://w3.cineplexbd.com/~ab46419/cineplexbd/index.php?visit=schedule/schedules&a=1")
+(def cinehub-url "http://www.cineplexbd.com")
+(def schedule-url "http://cineplexbd.com/index.php?visit=schedule/schedules&a=1")
 (def movie-list-markup (fetch-url cinehub-url))
 (def schedule-markup (fetch-url schedule-url))
 
