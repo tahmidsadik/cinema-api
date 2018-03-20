@@ -1,4 +1,5 @@
 defmodule CinemaApiWeb.CineApiController do
+  import Enum, only: [map: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2]
   use CinemaApiWeb, :controller
 
   def parse_month_string_to_int(month) do
@@ -22,12 +23,12 @@ defmodule CinemaApiWeb.CineApiController do
     d =
       date
       |> String.split(",")
-      |> Enum.slice(1..-1)
-      |> Enum.map(fn n -> String.trim(n) end)
+      |> slice(1..-1)
+      |> map(fn n -> String.trim(n) end)
 
-    day = Enum.at(d, 0) |> String.split() |> Enum.at(1) |> String.to_integer()
-    month = Enum.at(d, 0) |> String.split() |> Enum.at(0) |> parse_month_string_to_int
-    year = Enum.at(d, 1) |> String.to_integer()
+    day = at(d, 0) |> String.split() |> at(1) |> String.to_integer()
+    month = at(d, 0) |> String.split() |> at(0) |> parse_month_string_to_int
+    year = at(d, 1) |> String.to_integer()
 
     %{
       :day => day,
@@ -46,15 +47,15 @@ defmodule CinemaApiWeb.CineApiController do
     time_period =
       time
       |> String.split(~r/\d{2}:\d{2}/)
-      |> Enum.at(1)
+      |> at(1)
 
     hour =
       case time_period do
-        "AM" -> Enum.at(t, 0) |> String.to_integer()
-        "PM" -> Enum.at(t, 0) |> String.to_integer() |> Kernel.+(12)
+        "AM" -> at(t, 0) |> String.to_integer()
+        "PM" -> at(t, 0) |> String.to_integer() |> Kernel.+(12)
       end
 
-    minute = Enum.at(t, 1) |> String.to_integer()
+    minute = at(t, 1) |> String.to_integer()
     second = 0
 
     %{
@@ -66,15 +67,15 @@ defmodule CinemaApiWeb.CineApiController do
 
   def normalize_movie_dates(movie_dates) do
     movie_dates
-    |> Enum.map(fn date -> normalize_date_format(date) end)
+    |> map(fn date -> normalize_date_format(date) end)
   end
 
   def get_movie_times(parsed_html_body) do
     parsed_html_body
     |> Floki.find(".col-lg-8 .col-xs-12")
-    |> Enum.map(fn n -> Floki.find(n, ".items-wrap") end)
-    |> Enum.map(fn n ->
-      Enum.map(n, fn x ->
+    |> map(fn n -> Floki.find(n, ".items-wrap") end)
+    |> map(fn n ->
+      map(n, fn x ->
         x
         |> Floki.find("li")
         |> Floki.text()
@@ -88,16 +89,16 @@ defmodule CinemaApiWeb.CineApiController do
   def get_movie_dates(parsed_html_body) do
     parsed_html_body
     |> Floki.find(".date-tx")
-    |> Enum.map(fn n -> n |> Floki.find("strong") |> Floki.text() end)
+    |> map(fn n -> n |> Floki.find("strong") |> Floki.text() end)
   end
 
   def get_movie_names(parsed_html_body) do
     parsed_html_body
     |> Floki.find(".col-lg-8 .col-xs-12")
-    |> Enum.map(fn block -> Floki.find(block, ".text-info") end)
-    |> Enum.map(fn n -> Enum.map(n, fn x -> Floki.text(x) end) end)
-    |> Enum.map(fn n ->
-      Enum.map(n, fn x ->
+    |> map(fn block -> Floki.find(block, ".text-info") end)
+    |> map(fn n -> map(n, fn x -> Floki.text(x) end) end)
+    |> map(fn n ->
+      map(n, fn x ->
         x |> String.trim()
         |> String.replace("\n", "")
       end)
@@ -107,17 +108,17 @@ defmodule CinemaApiWeb.CineApiController do
   def get_unique_movies(movie_list) do
     movie_list
     |> List.flatten()
-    |> Enum.uniq()
+    |> uniq()
   end
 
   def merge_movie_date_time(movie_dates, movie_times) do
-    Enum.zip(normalize_movie_dates(movie_dates), movie_times)
-    |> Enum.map(fn date_time_pair ->
+    zip(normalize_movie_dates(movie_dates), movie_times)
+    |> map(fn date_time_pair ->
       date = elem(date_time_pair, 0)
 
-      Enum.map(elem(date_time_pair, 1), fn times ->
+      map(elem(date_time_pair, 1), fn times ->
         String.split(times)
-        |> Enum.map(fn time ->
+        |> map(fn time ->
           t = normalize_time_format(time)
 
           {:ok, show_time} =
@@ -130,10 +131,10 @@ defmodule CinemaApiWeb.CineApiController do
   end
 
   def merge_movie_with_showtime(movie_names, showtimes) do
-    for i <- 0..(Enum.count(movie_names) - 1),
+    for i <- 0..(count(movie_names) - 1),
         do:
-          Enum.zip(Enum.at(movie_names, i), Enum.at(showtimes, i))
-          |> Enum.into(%{})
+          zip(at(movie_names, i), at(showtimes, i))
+          |> into(%{})
   end
 
   def get_cineplex_movie_list() do
@@ -152,7 +153,7 @@ defmodule CinemaApiWeb.CineApiController do
         movie_with_showtimes = merge_movie_with_showtime(movie_names, showtimes)
         {:ok, movie_with_showtimes}
 
-      # movie_names_uniq = movie_names |> Enum.uniq()
+      # movie_names_uniq = movie_names |> uniq()
       # movie_showtime_with_date = {:ok, [movie_names, movie_times, movie_dates]}
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->

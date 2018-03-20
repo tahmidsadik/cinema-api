@@ -55,3 +55,5 @@ config :cinema_api, CinemaApi.Repo,
   database: "cinema_api_dev",
   hostname: "localhost",
   pool_size: 10
+
+import_config "dev.secret.exs"
