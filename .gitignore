@@ -4,7 +4,8 @@
 /deps
 /*.ez
 .DS_Store
-.elixir_ls
+/.elixir_ls
+/.vscode
 *.beam
 
 

@@ -1,22 +1,42 @@
 defmodule CinemaApi.CinemaInfoFetcher do
-  import Enum, only: [map: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2]
+  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2]
 
   def parse_month_string_to_int(month) do
     case month do
-      "January" -> 1
-      "February" -> 2
-      "March" -> 3
-      "April" -> 4
-      "May" -> 5
-      "June" -> 6
-      "July" -> 7
-      "August" -> 8
-      "September" -> 9
-      "October" -> 10
-      "November" -> 11
-      "December" -> 12
+      n when n in ["January", "Jan"] -> 1
+      n when n in ["February", "Feb"] -> 2
+      n when n in ["March", "Mar"] -> 3
+      n when n in ["April", "Apr"] -> 4
+      n when n in ["May"] -> 5
+      n when n in ["June", "Jun"] -> 6
+      n when n in ["July", "Jul"] -> 7
+      n when n in ["August", "Aug"] -> 8
+      n when n in ["September", "Sep"] -> 9
+      n when n in ["October", "Oct"] -> 10
+      n when n in ["November", "Nov"] -> 11
+      n when n in ["December", "Dec"] -> 12
     end
   end
+
+  def parse_release_date(release_date) do
+    # date format is "23 May 2018"
+    [day | [month | [year | _]]] =
+      release_date
+      |> String.split()
+
+    {:ok, date} =
+      Date.new(String.to_integer(year), parse_month_string_to_int(month), String.to_integer(day))
+
+    date
+  end
+
+  # def parse_runtime(runtime) do
+  #   # runtime format "136 min"
+  #   [minute | _] = String.split(runtime)
+
+  #   {:ok, rtime} = Time.new(0, minute, 0, 0)
+  #   rtime
+  # end
 
   def normalize_date_format(date) do
     d =
@@ -151,7 +171,7 @@ defmodule CinemaApi.CinemaInfoFetcher do
         movie_dates = get_movie_dates(parsed_body)
         showtimes = merge_movie_date_time(movie_dates, movie_times)
         movie_with_showtimes = merge_movie_with_showtime(movie_names, showtimes)
-        movie_names_uniq = movie_names |> uniq()
+        movie_names_uniq = get_unique_movies(movie_names)
 
         movie_data = %{
           :movie_list => movie_names_uniq,
@@ -172,27 +192,76 @@ defmodule CinemaApi.CinemaInfoFetcher do
     end
   end
 
-  def async_task_test do
-    OMDB_API_KEY = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:omdb_api_key]
-    OMDB_URL = "http://www.omdbapi.com/"
-    OMDB_URL
+  def prepare_omdb_request_url_from_movie_names(uniq_movie_list) do
+    omdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:omdb_api_key]
+    omdb_url = "http://www.omdbapi.com/"
 
-    case get_cineplex_movie_list() do
-      {:err, msg } -> IO.puts msg
-      {:ok, movies } -> 
-        movies.movie_list
-        |> map(fn name -> OMDB_URL <> ) 
-    end
+    uniq_movie_list
+    |> Enum.map(fn movie -> String.replace(movie, " ", "+") end)
+    |> map(fn movie -> omdb_url <> "?t=" <> movie <> "&apikey=" <> omdb_api_key end)
+  end
 
-    # urls = [
-    #   "https://google.com",
-    #   "https://www.rust-lang.org/en-US/",
-    #   "https://atom.io",
-    #   "https://code.visualstudio.com"
-    # ]
+  def fetch_parallel(list_of_urls) do
+    list_of_urls
+    |> map(fn url -> Task.async(fn -> HTTPoison.get(url) end) end)
+    |> map(&Task.await/1)
+    |> map(fn response ->
+      case response do
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+          %{
+            error: false,
+            body: body,
+            errMessage: nil
+          }
 
-    # urls
-    # |> map(fn url -> Task.async(fn -> HTTPoison.get(url) end) end)
-    # |> map(&Task.await/1)
+        {:ok, %HTTPoison.Response{status_code: 404}} ->
+          %{
+            error: true,
+            body: nil,
+            errMessage: "Could not find the requested resource"
+          }
+
+        {:error, %HTTPoison.Error{id: id, reason: reason}} ->
+          %{
+            error: true,
+            body: nil,
+            errMessage: reason
+          }
+      end
+    end)
+  end
+
+  def parse_movie_data_from_response(responses) do
+    responses
+    |> filter(fn response -> !response.error end)
+    |> map(fn response -> Poison.decode!(response.body) end)
+    |> filter(fn movie -> movie["Response"] == "True" end)
+  end
+
+  def create_movie_form_response(responses) do
+    responses
+    |> map(fn r ->
+      %{
+        imdb_id: r["imdbID"],
+        title: r["Title"],
+        year: r["Year"],
+        release_date: r["Released"],
+        runtime: r["Runtime"],
+        genre: r["Genre"],
+        director: r["Director"],
+        actors: r["Actors"],
+        plot: r["Plot"],
+        language: r["Language"],
+        country: r["Country"],
+        awards: r["Awards"],
+        imdb_rating: r["imdbRating"],
+        # rotten_tomatoes_rating: at(r["Ratings"], 2),
+        # metacritic_rating: r["Ratings"] |> at(2) |> elem(1),
+        media_type: r["Type"],
+        box_office: r["BoxOffice"],
+        production: r["Production"],
+        website: r["Website"]
+      }
+    end)
   end
 end
