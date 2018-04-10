@@ -42,7 +42,8 @@ defmodule CinemaApi.Mixfile do
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 1.0"},
       {:floki, "~> 0.20.0"},
-      {:hackney, "~> 1.11"}
+      {:hackney, "~> 1.11"},
+      {:credo, "~> 0.9.0-rc1", only: [:dev, :test], runtime: false}
     ]
   end
 

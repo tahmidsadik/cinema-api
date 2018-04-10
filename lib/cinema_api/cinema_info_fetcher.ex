@@ -1,6 +1,5 @@
 defmodule CinemaApi.CinemaInfoFetcher do
-  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2]
-
+  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2] 
   def parse_month_string_to_int(month) do
     case month do
       n when n in ["January", "Jan"] -> 1
@@ -161,7 +160,7 @@ defmodule CinemaApi.CinemaInfoFetcher do
     url = "http://www.cineplexbd.com/cineplexbd/showtime"
     # url = "file:///Users/tahmid/Documents/cineplex.html"
     headers = []
-    options = [timeout: 15000, recv_timeout: 15000]
+    options = [timeout: 15_000, recv_timeout: 15_000]
 
     case HTTPoison.get(url, headers, options) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
