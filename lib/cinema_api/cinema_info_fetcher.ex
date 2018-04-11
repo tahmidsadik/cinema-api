@@ -1,5 +1,6 @@
 defmodule CinemaApi.CinemaInfoFetcher do
-  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2] 
+  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2]
+
   def parse_month_string_to_int(month) do
     case month do
       n when n in ["January", "Jan"] -> 1
@@ -156,14 +157,41 @@ defmodule CinemaApi.CinemaInfoFetcher do
           |> into(%{})
   end
 
-  def get_cineplex_movie_list() do
+  def save_markup_file(content) do
+    {:ok, file} = File.open("./priv/static/cine_info.html", [:write, :utf8])
+    IO.write(file, content)
+    File.close(file)
+  end
+
+  def get_markup_from_network() do
     url = "http://www.cineplexbd.com/cineplexbd/showtime"
-    # url = "file:///Users/tahmid/Documents/cineplex.html"
     headers = []
     options = [timeout: 15_000, recv_timeout: 15_000]
 
     case HTTPoison.get(url, headers, options) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> 
+        save_markup_file body
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: 404}} -> {:err, "Couldn't find the requested resource"}
+
+      {:error, %HTTPoison.Error{reason: reason}} -> 
+        IO.puts reason
+        {:err, reason}
+    end
+  end
+
+  def get_markup() do
+    case File.exists? "./priv/static/cine_info.html" do
+      true -> File.read("./priv/static/cine_info.html")
+      false -> get_markup_from_network()
+    end
+  end
+
+  def get_cineplex_movie_list() do
+
+    case get_markup() do
+      {:ok, body} ->
         parsed_body = Floki.parse(body)
         movie_names = get_movie_names(parsed_body)
         movie_times = get_movie_times(parsed_body)
@@ -181,13 +209,9 @@ defmodule CinemaApi.CinemaInfoFetcher do
 
       # movie_showtime_with_date = {:ok, [movie_names, movie_times, movie_dates]}
 
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        IO.puts("404 block")
-        {:err, "Tough luck, 404, Chekc the url again"}
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        IO.puts(reason)
-        {:err, "Something fucked up"}
+      {:err, msg} ->
+        IO.puts msg
+        {:err, msg}
     end
   end
 
