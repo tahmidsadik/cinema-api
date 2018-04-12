@@ -16,8 +16,7 @@ defmodule CinemaApi.CinemaInfoFetcher do
       n when n in ["November", "Nov"] -> 11
       n when n in ["December", "Dec"] -> 12
     end
-  end
-
+  end 
   def parse_release_date(release_date) do
     # date format is "23 May 2018"
     [day | [month | [year | _]]] =
@@ -84,6 +83,11 @@ defmodule CinemaApi.CinemaInfoFetcher do
     }
   end
 
+  def prepare_movie_title(movies) do
+    movies
+    |> map(fn movie -> String.replace(movie, ~r/\(\dD\)/, "") |> String.trim() end)
+  end
+
   def normalize_movie_dates(movie_dates) do
     movie_dates
     |> map(fn date -> normalize_date_format(date) end)
@@ -129,6 +133,7 @@ defmodule CinemaApi.CinemaInfoFetcher do
     movie_list
     |> List.flatten()
     |> uniq()
+    |> prepare_movie_title()
   end
 
   def merge_movie_date_time(movie_dates, movie_times) do
@@ -188,8 +193,7 @@ defmodule CinemaApi.CinemaInfoFetcher do
     end
   end
 
-  def get_cineplex_movie_list() do
-
+  def get_cineplex_movie_list() do 
     case get_markup() do
       {:ok, body} ->
         parsed_body = Floki.parse(body)
@@ -205,10 +209,7 @@ defmodule CinemaApi.CinemaInfoFetcher do
           :movie_with_showtime => movie_with_showtimes
         }
 
-        {:ok, movie_data}
-
-      # movie_showtime_with_date = {:ok, [movie_names, movie_times, movie_dates]}
-
+        {:ok, movie_data} # movie_showtime_with_date = {:ok, [movie_names, movie_times, movie_dates]} 
       {:err, msg} ->
         IO.puts msg
         {:err, msg}
@@ -254,7 +255,14 @@ defmodule CinemaApi.CinemaInfoFetcher do
     end)
   end
 
-  def parse_movie_data_from_response(responses) do
+  def parse_omdb_movie_data_from_response(responses) do
+    responses
+    |> filter(fn response -> !response.error end)
+    |> map(fn response -> Poison.decode!(response.body) end)
+    |> filter(fn movie -> movie["Response"] == "True" end)
+  end
+
+  def parse_omdb_movie_data_from_response(responses) do
     responses
     |> filter(fn response -> !response.error end)
     |> map(fn response -> Poison.decode!(response.body) end)
@@ -287,4 +295,20 @@ defmodule CinemaApi.CinemaInfoFetcher do
       }
     end)
   end
+
+  def get_cineplex_movies_with_omdb_data() do
+    cineplex_movies = get_cineplex_movie_list()
+    movie_titles = elem(cineplex_movies, 1).movie_list
+    movie_titles
+    |> prepare_omdb_request_url_from_movie_names 
+    |> fetch_parallel 
+    |> parse_omdb_movie_data_from_response 
+    |> create_movie_form_response
+  end
+
+  def fetch_poster_from_tmdb() do
+    ids = get_cineplex_movies_with_omdb_data() |> map(fn movie -> movie.imdb_id end)
+    parepare_tm
+  end
+
 end
