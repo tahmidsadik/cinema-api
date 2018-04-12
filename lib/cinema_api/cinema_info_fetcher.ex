@@ -1,6 +1,5 @@
 defmodule CinemaApi.CinemaInfoFetcher do
-  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2]
-
+  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2] 
   def parse_month_string_to_int(month) do
     case month do
       n when n in ["January", "Jan"] -> 1
@@ -28,6 +27,11 @@ defmodule CinemaApi.CinemaInfoFetcher do
       Date.new(String.to_integer(year), parse_month_string_to_int(month), String.to_integer(day))
 
     date
+  end
+
+  def discard_2d_3d_from_movie_name(movies) do
+    movies
+    |> Enum.map(fn n -> String.replace(n, ~r/\(\dD\)/, "") |> String.trim() end)
   end
 
   # def parse_runtime(runtime) do
@@ -129,6 +133,7 @@ defmodule CinemaApi.CinemaInfoFetcher do
     movie_list
     |> List.flatten()
     |> uniq()
+    |> discard_2d_3d_from_movie_name()
   end
 
   def merge_movie_date_time(movie_dates, movie_times) do
@@ -169,27 +174,27 @@ defmodule CinemaApi.CinemaInfoFetcher do
     options = [timeout: 15_000, recv_timeout: 15_000]
 
     case HTTPoison.get(url, headers, options) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> 
-        save_markup_file body
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        save_markup_file(body)
         {:ok, body}
 
-      {:ok, %HTTPoison.Response{status_code: 404}} -> {:err, "Couldn't find the requested resource"}
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        {:err, "Couldn't find the requested resource"}
 
-      {:error, %HTTPoison.Error{reason: reason}} -> 
-        IO.puts reason
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.puts(reason)
         {:err, reason}
     end
   end
 
   def get_markup() do
-    case File.exists? "./priv/static/cine_info.html" do
+    case File.exists?("./priv/static/cine_info.html") do
       true -> File.read("./priv/static/cine_info.html")
       false -> get_markup_from_network()
     end
   end
 
   def get_cineplex_movie_list() do
-
     case get_markup() do
       {:ok, body} ->
         parsed_body = Floki.parse(body)
@@ -210,17 +215,17 @@ defmodule CinemaApi.CinemaInfoFetcher do
       # movie_showtime_with_date = {:ok, [movie_names, movie_times, movie_dates]}
 
       {:err, msg} ->
-        IO.puts msg
+        IO.puts(msg)
         {:err, msg}
     end
   end
 
   def prepare_omdb_request_url_from_movie_names(uniq_movie_list) do
     omdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:omdb_api_key]
-    omdb_url = "http://www.omdbapi.com/"
+    omdb_url = "https://www.omdbapi.com/"
 
     uniq_movie_list
-    |> Enum.map(fn movie -> String.replace(movie, " ", "+") end)
+    |> map(fn movie -> String.replace(movie, " ", "+") end)
     |> map(fn movie -> omdb_url <> "?t=" <> movie <> "&apikey=" <> omdb_api_key end)
   end
 
@@ -280,11 +285,36 @@ defmodule CinemaApi.CinemaInfoFetcher do
         imdb_rating: r["imdbRating"],
         # rotten_tomatoes_rating: at(r["Ratings"], 2),
         # metacritic_rating: r["Ratings"] |> at(2) |> elem(1),
+        poster: r["Poster"],
         media_type: r["Type"],
         box_office: r["BoxOffice"],
         production: r["Production"],
         website: r["Website"]
       }
     end)
+  end
+
+  def prepare_tmdb_url_from_imdb_id(imdb_ids) do
+    tmdb_api_version = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_version]
+    tmdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_key_v3]
+    tmdb_base_url = "https://api.themoviedb.org/"
+    tmdb_url = tmdb_base_url <> "/" <> tmdb_api_version
+
+    # we are using the /find endpoint here. it acceps external
+    # ids like IMDB_ID, which is what we will be using 
+    imdb_ids
+    |> map(fn imdb_id -> tmdb_url <> "/find/" <> imdb_id <> "?api_key=" <> tmdb_api_key <> "&external_source=imdb_id" end)
+
+  end
+
+  def get_movies_with_imdb_info() do
+    {:ok, movie_data} = get_cineplex_movie_list()
+    movies = movie_data.movie_list
+
+    movies
+    |> prepare_omdb_request_url_from_movie_names
+    |> fetch_parallel
+    |> parse_movie_data_from_response
+    |> create_movie_form_response
   end
 end
