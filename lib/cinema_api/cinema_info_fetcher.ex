@@ -229,6 +229,19 @@ defmodule CinemaApi.CinemaInfoFetcher do
     |> map(fn movie -> omdb_url <> "?t=" <> movie <> "&apikey=" <> omdb_api_key end)
   end
 
+  def prepare_tmdb_url_from_imdb_id(imdb_ids) do
+    tmdb_api_version = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_version]
+    tmdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_key_v3]
+    tmdb_base_url = "https://api.themoviedb.org/"
+    tmdb_url = tmdb_base_url <> "/" <> tmdb_api_version
+
+    # we are using the /find endpoint here. it acceps external
+    # ids like IMDB_ID, which is what we will be using 
+    imdb_ids
+    |> map(fn imdb_id -> tmdb_url <> "/find/" <> imdb_id <> "?api_key=" <> tmdb_api_key <> "&external_source=imdb_id" end)
+
+  end
+
   def fetch_parallel(list_of_urls) do
     list_of_urls
     |> map(fn url -> Task.async(fn -> HTTPoison.get(url) end) end)
@@ -293,20 +306,6 @@ defmodule CinemaApi.CinemaInfoFetcher do
       }
     end)
   end
-
-  def prepare_tmdb_url_from_imdb_id(imdb_ids) do
-    tmdb_api_version = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_version]
-    tmdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_key_v3]
-    tmdb_base_url = "https://api.themoviedb.org/"
-    tmdb_url = tmdb_base_url <> "/" <> tmdb_api_version
-
-    # we are using the /find endpoint here. it acceps external
-    # ids like IMDB_ID, which is what we will be using 
-    imdb_ids
-    |> map(fn imdb_id -> tmdb_url <> "/find/" <> imdb_id <> "?api_key=" <> tmdb_api_key <> "&external_source=imdb_id" end)
-
-  end
-
   def get_movies_with_imdb_info() do
     {:ok, movie_data} = get_cineplex_movie_list()
     movies = movie_data.movie_list
@@ -318,3 +317,4 @@ defmodule CinemaApi.CinemaInfoFetcher do
     |> create_movie_form_response
   end
 end
+
