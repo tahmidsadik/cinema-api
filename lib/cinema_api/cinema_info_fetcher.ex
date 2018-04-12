@@ -3,13 +3,13 @@ defmodule CinemaApi.CinemaInfoFetcher do
 
   def parse_month_string_to_int(month) do
     case month do
-      n when n in ["January", "Jan"] -> 1
-      n when n in ["February", "Feb"] -> 2
-      n when n in ["March", "Mar"] -> 3
-      n when n in ["April", "Apr"] -> 4
+      n when n in ["January", "Jan"] -> 1 
+      n when n in ["February", "Feb"] -> 2 
+      n when n in ["March", "Mar"] -> 3 
+      n when n in ["April", "Apr"] -> 4 
       n when n in ["May"] -> 5
-      n when n in ["June", "Jun"] -> 6
-      n when n in ["July", "Jul"] -> 7
+      n when n in ["June", "Jun"] -> 6 
+      n when n in ["July", "Jul"] -> 7 
       n when n in ["August", "Aug"] -> 8
       n when n in ["September", "Sep"] -> 9
       n when n in ["October", "Oct"] -> 10
@@ -225,6 +225,18 @@ defmodule CinemaApi.CinemaInfoFetcher do
     |> map(fn movie -> omdb_url <> "?t=" <> movie <> "&apikey=" <> omdb_api_key end)
   end
 
+  def prepare_tmdb_url_from_imdb_id(imdb_ids) do
+    tmdb_api_version = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_version]
+    tmdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_key_v3]
+    tmdb_base_url = "https://api.themoviedb.org/"
+    tmdb_url = tmdb_base_url <> tmdb_api_version
+
+    # we are using /find endpoint of the tmdb api. it acceps external ids like
+    # IMDB_ID , which is what we will be using here.
+
+    imdb_ids |> map(fn imdb_id -> tmdb_url <> "/find/" <> imdb_id <> "?api_key=" <> tmdb_api_key <> "&external_source=imdb_id" end)
+  end
+
   def fetch_parallel(list_of_urls) do
     list_of_urls
     |> map(fn url -> Task.async(fn -> HTTPoison.get(url) end) end)
@@ -255,18 +267,17 @@ defmodule CinemaApi.CinemaInfoFetcher do
     end)
   end
 
-  def parse_omdb_movie_data_from_response(responses) do
+  def parse_response(responses) do
     responses
     |> filter(fn response -> !response.error end)
     |> map(fn response -> Poison.decode!(response.body) end)
     |> filter(fn movie -> movie["Response"] == "True" end)
   end
 
-  def parse_omdb_movie_data_from_response(responses) do
+  def parse_response_tmdb(responses) do
     responses
     |> filter(fn response -> !response.error end)
     |> map(fn response -> Poison.decode!(response.body) end)
-    |> filter(fn movie -> movie["Response"] == "True" end)
   end
 
   def create_movie_form_response(responses) do
@@ -302,13 +313,33 @@ defmodule CinemaApi.CinemaInfoFetcher do
     movie_titles
     |> prepare_omdb_request_url_from_movie_names 
     |> fetch_parallel 
-    |> parse_omdb_movie_data_from_response 
+    |> parse_response 
     |> create_movie_form_response
   end
 
-  def fetch_poster_from_tmdb() do
-    ids = get_cineplex_movies_with_omdb_data() |> map(fn movie -> movie.imdb_id end)
-    parepare_tm
+  def fetch_poster_from_tmdb(imdb_ids) do
+    imdb_ids
+    |> prepare_tmdb_url_from_imdb_id
+    |> fetch_parallel
+    |> parse_response_tmdb
+    |> map(fn n -> n["movie_results"] end) 
+    |> List.flatten 
+    |> Enum.map(fn n -> 
+      %{
+        tmdb_poster: n["poster_path"],
+        backdrop: n["backdrop_path"]
+      } 
+    end)
   end
 
+  def add_tmdb_images_to_movie_data do
+    data = get_cineplex_movies_with_omdb_data()
+    imdb_ids = map(data, fn m -> m.imdb_id end)
+    image_links = fetch_poster_from_tmdb(imdb_ids)
+    zip(data, image_links)
+    |> map(fn n -> Map.merge(elem(n, 0), elem(n, 1)) end)
+  end
 end
+
+
+
