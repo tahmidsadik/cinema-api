@@ -1,5 +1,6 @@
 defmodule CinemaApi.CinemaInfoFetcher do
-  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2] 
+  import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2]
+
   def parse_month_string_to_int(month) do
     case month do
       n when n in ["January", "Jan"] -> 1
@@ -31,7 +32,11 @@ defmodule CinemaApi.CinemaInfoFetcher do
 
   def discard_2d_3d_from_movie_name(movies) do
     movies
-    |> Enum.map(fn n -> String.replace(n, ~r/\(\dD\)/, "") |> String.trim() end)
+    |> Enum.map(fn n -> discard_3d_info_from_cineplex_movie(n) end)
+  end
+
+  def discard_3d_info_from_cineplex_movie(movie) do
+    String.replace(movie, ~r/\(\s*\dD\)/, "") |> String.trim()
   end
 
   # def parse_runtime(runtime) do
@@ -194,6 +199,15 @@ defmodule CinemaApi.CinemaInfoFetcher do
     end
   end
 
+  def normalize_cineplex_movie_schedules(showtimes) do
+    showtimes
+    |> List.foldl(%{}, fn movie, acc -> Map.merge(movie, acc, fn key, v1, v2 -> v1 ++ v2 end) end)
+    |> Enum.map(fn {name, showtime} ->
+      {discard_3d_info_from_cineplex_movie(name), Enum.uniq(showtime)}
+    end)
+    |> Enum.into(%{})
+  end
+
   def get_cineplex_movie_list() do
     case get_markup() do
       {:ok, body} ->
@@ -230,16 +244,19 @@ defmodule CinemaApi.CinemaInfoFetcher do
   end
 
   def prepare_tmdb_url_from_imdb_id(imdb_ids) do
-    tmdb_api_version = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_version]
+    tmdb_api_version =
+      Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_version]
+
     tmdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_key_v3]
     tmdb_base_url = "https://api.themoviedb.org/"
     tmdb_url = tmdb_base_url <> "/" <> tmdb_api_version
 
     # we are using the /find endpoint here. it acceps external
-    # ids like IMDB_ID, which is what we will be using 
+    # ids like IMDB_ID, which is what we will be using
     imdb_ids
-    |> map(fn imdb_id -> tmdb_url <> "/find/" <> imdb_id <> "?api_key=" <> tmdb_api_key <> "&external_source=imdb_id" end)
-
+    |> map(fn imdb_id ->
+      tmdb_url <> "/find/" <> imdb_id <> "?api_key=" <> tmdb_api_key <> "&external_source=imdb_id"
+    end)
   end
 
   def fetch_parallel(list_of_urls) do
@@ -276,6 +293,21 @@ defmodule CinemaApi.CinemaInfoFetcher do
     responses
     |> filter(fn response -> !response.error end)
     |> map(fn response -> Poison.decode!(response.body) end)
+  end
+
+  def add_cineplex_movie_titles_to_fetched_movies(movies, titles) do
+    movies
+    |> zip(titles)
+    |> map(fn movie -> Map.put(elem(movie, 0), "cineplex_title", elem(movie, 1)) end)
+  end
+
+  def add_cineplex_movie_schedules_to_fetched_movies(movies, schedules) do
+    movies
+    |> map(fn movie -> Map.put(movie, :schedules, schedules) end)
+  end
+
+  def remove_non_imdb_movies(data) do
+    data
     |> filter(fn movie -> movie["Response"] == "True" end)
   end
 
@@ -286,7 +318,7 @@ defmodule CinemaApi.CinemaInfoFetcher do
         imdb_id: r["imdbID"],
         title: r["Title"],
         year: r["Year"],
-        release_date: r["Released"],
+        release_date: parse_release_date(r["Released"]),
         runtime: r["Runtime"],
         genre: r["Genre"],
         director: r["Director"],
@@ -302,10 +334,14 @@ defmodule CinemaApi.CinemaInfoFetcher do
         media_type: r["Type"],
         box_office: r["BoxOffice"],
         production: r["Production"],
-        website: r["Website"]
+        website: r["Website"],
+        schedules: r[:schedules][r["cineplex_title"]],
+        cineplex_title: r["cineplex_title"]
+        
       }
     end)
   end
+
   def get_movies_with_imdb_info() do
     {:ok, movie_data} = get_cineplex_movie_list()
     movies = movie_data.movie_list
@@ -314,7 +350,11 @@ defmodule CinemaApi.CinemaInfoFetcher do
     |> prepare_omdb_request_url_from_movie_names
     |> fetch_parallel
     |> parse_movie_data_from_response
+    |> add_cineplex_movie_titles_to_fetched_movies(movie_data.movie_list)
+    |> add_cineplex_movie_schedules_to_fetched_movies(
+      normalize_cineplex_movie_schedules(movie_data.movie_with_showtime)
+    )
+    |> remove_non_imdb_movies
     |> create_movie_form_response
   end
 end
-
