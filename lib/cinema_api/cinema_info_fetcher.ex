@@ -3,20 +3,21 @@ defmodule CinemaApi.CinemaInfoFetcher do
 
   def parse_month_string_to_int(month) do
     case month do
-      n when n in ["January", "Jan"] -> 1 
-      n when n in ["February", "Feb"] -> 2 
-      n when n in ["March", "Mar"] -> 3 
-      n when n in ["April", "Apr"] -> 4 
+      n when n in ["January", "Jan"] -> 1
+      n when n in ["February", "Feb"] -> 2
+      n when n in ["March", "Mar"] -> 3
+      n when n in ["April", "Apr"] -> 4
       n when n in ["May"] -> 5
-      n when n in ["June", "Jun"] -> 6 
-      n when n in ["July", "Jul"] -> 7 
+      n when n in ["June", "Jun"] -> 6
+      n when n in ["July", "Jul"] -> 7
       n when n in ["August", "Aug"] -> 8
       n when n in ["September", "Sep"] -> 9
       n when n in ["October", "Oct"] -> 10
       n when n in ["November", "Nov"] -> 11
       n when n in ["December", "Dec"] -> 12
     end
-  end 
+  end
+
   def parse_release_date(release_date) do
     # date format is "23 May 2018"
     [day | [month | [year | _]]] =
@@ -228,7 +229,9 @@ defmodule CinemaApi.CinemaInfoFetcher do
           :movie_with_showtime => movie_with_showtimes
         }
 
-        {:ok, movie_data} # movie_showtime_with_date = {:ok, [movie_names, movie_times, movie_dates]} 
+        # movie_showtime_with_date = {:ok, [movie_names, movie_times, movie_dates]} 
+        {:ok, movie_data}
+
       {:err, msg} ->
         IO.puts(msg)
         {:err, msg}
@@ -251,7 +254,6 @@ defmodule CinemaApi.CinemaInfoFetcher do
     tmdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_key_v3]
     tmdb_base_url = "https://api.themoviedb.org/"
     tmdb_url = tmdb_base_url <> "/" <> tmdb_api_version
-
     # we are using the /find endpoint here. it acceps external
     # ids like IMDB_ID, which is what we will be using
     imdb_ids
@@ -344,38 +346,22 @@ defmodule CinemaApi.CinemaInfoFetcher do
         website: r["Website"],
         schedules: r[:schedules][r["cineplex_title"]],
         cineplex_title: r["cineplex_title"]
-        
       }
     end)
   end
-
-  def get_cineplex_movies_with_omdb_data() do
-    {:ok, movie_data} = get_cineplex_movie_list()
-    movies = movie_data.movie_list
-
-    movies
-    |> prepare_omdb_request_url_from_movie_names
-    |> fetch_parallel
-    |> parse_movie_data_from_response
-    |> add_cineplex_movie_titles_to_fetched_movies(movie_data.movie_list)
-    |> add_cineplex_movie_schedules_to_fetched_movies(
-      normalize_cineplex_movie_schedules(movie_data.movie_with_showtime)
-    )
-    |> remove_non_imdb_movies
-    |> create_movie_form_response
 
   def fetch_poster_from_tmdb(imdb_ids) do
     imdb_ids
     |> prepare_tmdb_url_from_imdb_id
     |> fetch_parallel
     |> parse_response_tmdb
-    |> map(fn n -> n["movie_results"] end) 
-    |> List.flatten 
-    |> Enum.map(fn n -> 
+    |> map(fn n -> n["movie_results"] end)
+    |> List.flatten()
+    |> Enum.map(fn n ->
       %{
         tmdb_poster: n["poster_path"],
         backdrop: n["backdrop_path"]
-      } 
+      }
     end)
   end
 
@@ -383,7 +369,24 @@ defmodule CinemaApi.CinemaInfoFetcher do
     data = get_cineplex_movies_with_omdb_data()
     imdb_ids = map(data, fn m -> m.imdb_id end)
     image_links = fetch_poster_from_tmdb(imdb_ids)
+
     zip(data, image_links)
     |> map(fn n -> Map.merge(elem(n, 0), elem(n, 1)) end)
+  end
+
+    def get_cineplex_movies_with_omdb_data() do
+    {:ok, movie_data} = get_cineplex_movie_list()
+    movies = movie_data.movie_list
+
+    movies
+    |> prepare_omdb_request_url_from_movie_names
+    |> fetch_parallel
+    |> parse_response
+    |> add_cineplex_movie_titles_to_fetched_movies(movie_data.movie_list)
+    |> add_cineplex_movie_schedules_to_fetched_movies(
+      normalize_cineplex_movie_schedules(movie_data.movie_with_showtime)
+    )
+    |> remove_non_imdb_movies
+    |> create_movie_form_response
   end
 end
