@@ -23,8 +23,6 @@ defmodule CinemaApi.DataProvider do
     only: [prepare_omdb_request_url_from_movie_names: 1, fetch_parallel: 1, parse_response: 1]
 
   def create_imdb_movie(responses) do
-    IO.inspect(Enum.at(responses, 0))
-
     responses
     |> map(fn r ->
       %{
