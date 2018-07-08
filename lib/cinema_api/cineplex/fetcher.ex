@@ -4,6 +4,99 @@ defmodule CinemaApi.Cineplex.Fetcher do
   """
 
   import Enum, only: [map: 2]
+  import CinemaApi.OMDB, only: [fetch_parallel: 1]
+
+  def get_movie_links(markup) do
+    markup
+    |> Floki.find(".text-info")
+    |> Floki.attribute("href")
+    |> Enum.uniq()
+  end
+
+  @doc """
+  take a movie link and fetches the markup.
+  """
+  def fetch_movie_info_markup(link) do
+    headers = []
+    options = [timeout: 15_000, recv_timeout: 15_000]
+
+    case HTTPoison.get(link, headers, options) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        {:err, "Couldn't find the requested resource"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.puts(reason)
+        {:err, reason}
+    end
+  end
+
+  @doc """
+  takes the markup page of a movie and extracts all data from it
+  returns a Map %{}
+  """
+  def fetch_original_movie_info(response) do
+    case response do
+      %{body: markup, error: false} ->
+        info_markup = markup |> Floki.find(".border_right")
+
+        %{
+          plot:
+            markup
+            |> Floki.find(".synop-details")
+            |> Floki.text(),
+          director:
+            info_markup
+            |> Enum.at(0)
+            |> Floki.text(),
+          releae_date:
+            info_markup
+            |> Enum.at(1)
+            |> Floki.text(),
+          runtime:
+            info_markup
+            |> Enum.at(2)
+            |> Floki.text(),
+          genre:
+            info_markup
+            |> Enum.at(3)
+            |> Floki.text(),
+          actors:
+            info_markup
+            |> Enum.at(4)
+            |> Floki.text()
+        }
+
+      %{error: true, errMessage: reason} ->
+        IO.puts(reason)
+        %{err: true, message: reason}
+    end
+  end
+
+  def fetch_all_movies_original_info(links) do
+    links
+    |> fetch_parallel()
+    |> map(fn response -> fetch_original_movie_info(response) end)
+  end
+
+  def get_markup(url) do
+    headers = []
+    options = [timeout: 15_000, recv_timeout: 15_000]
+
+    case HTTPoison.get(url, headers, options) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        {:ok, body}
+
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        {:err, "Couldn't find the requested resource"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.puts(reason)
+        {:err, reason}
+    end
+  end
 
   def get_movie_times(parsed_html_body) do
     parsed_html_body

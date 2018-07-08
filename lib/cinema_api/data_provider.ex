@@ -15,13 +15,16 @@ defmodule CinemaApi.DataProvider do
       add_movie_schedules_to_fetched_movies: 2,
       remove_non_imdb_movies: 1,
       parse_release_date: 1,
-      normalize_cineplex_movie_schedules: 1
+      normalize_cineplex_movie_schedules: 1,
+      add_original_movie_info_to_fetched_movies: 2
     ]
 
   import CinemaApi.OMDB,
     only: [prepare_omdb_request_url_from_movie_names: 1, fetch_parallel: 1, parse_response: 1]
 
   def create_imdb_movie(responses) do
+    IO.inspect(Enum.at(responses, 0))
+
     responses
     |> map(fn r ->
       %{
@@ -46,7 +49,8 @@ defmodule CinemaApi.DataProvider do
         production: r["Production"],
         website: r["Website"],
         schedules: r[:schedules][r["cineplex_title"]],
-        cineplex_title: r["cineplex_title"]
+        cineplex_title: r["cineplex_title"],
+        original_info: r["original_info"]
       }
     end)
   end
@@ -54,7 +58,6 @@ defmodule CinemaApi.DataProvider do
   def get_cineplex_movies do
     case get_markup() do
       {:ok, body} ->
-        IO.inspect(body)
         {:ok, parse_cineplex_movies(body)}
 
       {:err, msg} ->
@@ -79,9 +82,10 @@ defmodule CinemaApi.DataProvider do
         |> add_movie_schedules_to_fetched_movies(
           normalize_cineplex_movie_schedules(movie_data.movie_with_showtime)
         )
-        |> remove_non_imdb_movies
+        |> add_original_movie_info_to_fetched_movies(movie_data.original_info)
         |> create_imdb_movie
-      {:err, msg} -> 
+
+      {:err, msg} ->
         msg
     end
   end

@@ -9,7 +9,9 @@ defmodule CinemaApi.Cineplex.Parser do
     only: [
       get_movie_times: 1,
       get_movie_dates: 1,
-      get_movie_names: 1
+      get_movie_names: 1,
+      get_movie_links: 1,
+      fetch_all_movies_original_info: 1
     ]
 
   @doc """
@@ -129,7 +131,6 @@ defmodule CinemaApi.Cineplex.Parser do
   end
 
   def merge_movie_date_time(movie_dates, movie_times) do
-
     zip(normalize_movie_dates(movie_dates), movie_times)
     |> map(fn date_time_pair ->
       date = elem(date_time_pair, 0)
@@ -178,6 +179,12 @@ defmodule CinemaApi.Cineplex.Parser do
     |> map(fn movie -> Map.put(elem(movie, 0), "cineplex_title", elem(movie, 1)) end)
   end
 
+  def add_original_movie_info_to_fetched_movies(movies, infos) do
+    movies
+    |> zip(infos)
+    |> map(fn movie -> Map.put(elem(movie, 0), "original_info", elem(movie, 1)) end)
+  end
+
   def add_movie_schedules_to_fetched_movies(movies, schedules) do
     movies
     |> map(fn movie -> Map.put(movie, :schedules, schedules) end)
@@ -192,13 +199,18 @@ defmodule CinemaApi.Cineplex.Parser do
     movie_names = get_movie_names(parsed_body)
     movie_times = get_movie_times(parsed_body)
     movie_dates = get_movie_dates(parsed_body)
+    movie_links = get_movie_links(parsed_body)
+    original_movie_infos = fetch_all_movies_original_info(movie_links)
     showtimes = merge_movie_date_time(movie_dates, movie_times)
     movie_with_showtimes = merge_movie_with_showtime(movie_names, showtimes)
     movie_names_uniq = get_unique_movies(movie_names)
+
     movie_data = %{
       :movie_list => movie_names_uniq,
-      :movie_with_showtime => movie_with_showtimes
+      :movie_with_showtime => movie_with_showtimes,
+      :original_info => original_movie_infos
     }
+
     movie_data
   end
 end

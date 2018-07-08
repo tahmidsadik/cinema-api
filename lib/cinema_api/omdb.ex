@@ -35,6 +35,13 @@ defmodule CinemaApi.OMDB do
             errMessage: "Could not find the requested resource"
           }
 
+        {:ok, %HTTPoison.Response{status_code: 500}} ->
+          %{
+            error: true,
+            body: nil,
+            errMessage: "Internal Server Error"
+          }
+
         {:error, %HTTPoison.Error{id: id, reason: reason}} ->
           %{
             error: true,
@@ -53,6 +60,7 @@ defmodule CinemaApi.OMDB do
     tmdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:tmdb_api_key_v3]
     tmdb_base_url = "https://api.themoviedb.org/"
     tmdb_url = tmdb_base_url <> "/" <> tmdb_api_version
+
     # we are using the /find endpoint here. it acceps external # ids like IMDB_ID, which is what we will be using
     imdb_ids
     |> map(fn imdb_id ->
