@@ -1,7 +1,7 @@
-@moduledoc """
-provides schema for the Movie Showtimes
-"""
 defmodule CinemaApi.Schemas.Showtime do
+  @moduledoc """
+  provides schema for the Movie Showtimes
+  """
   import Ecto.Changeset
   use Ecto.Schema
 
