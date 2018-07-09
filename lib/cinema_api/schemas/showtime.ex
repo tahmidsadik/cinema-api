@@ -12,7 +12,7 @@ defmodule CinemaApi.Schemas.Showtime do
     field(:cinema_hall, :string)
   end
 
-  def changeset(showtime, attr) do
+  def changeset(showtime, attrs) do
     showtime
     |> cast(attrs, [
       :movie_title,
