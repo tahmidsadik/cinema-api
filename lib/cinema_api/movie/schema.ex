@@ -1,7 +1,6 @@
 defmodule CinemaApi.Movie.Schema do
   import Ecto.Changeset
   use Ecto.Schema
-  alias CinemaApi.Movie
 
   schema "movies" do
     field(:imdb_id, :string)

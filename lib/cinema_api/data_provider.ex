@@ -13,7 +13,6 @@ defmodule CinemaApi.DataProvider do
       parse_cineplex_movies: 1,
       add_original_movie_titles_to_fetched_movies: 2,
       add_movie_schedules_to_fetched_movies: 2,
-      remove_non_imdb_movies: 1,
       parse_release_date: 1,
       normalize_cineplex_movie_schedules: 1,
       add_original_movie_info_to_fetched_movies: 2
