@@ -1,4 +1,7 @@
-defmodule CinemaApi.Movie.Schema do
+@moduledoc """
+provides table schema for Movie information
+"""
+defmodule CinemaApi.Schemas.Movie do
   import Ecto.Changeset
   use Ecto.Schema
 
