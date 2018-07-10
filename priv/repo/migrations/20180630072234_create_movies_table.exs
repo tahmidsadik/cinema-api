@@ -18,13 +18,16 @@ defmodule CinemaApi.Repo.Migrations.CreateMoviesTable do
       add(:country, :string)
       add(:awards, :string)
       add(:imdb_rating, :string)
-      # TODO: Add this ratings later
-      # field(:rooten_tomatoes_rating, :string)
-      # field(:metacritic_rating, :string)
       add(:media_type, :string)
       add(:box_office, :string)
       add(:production, :string)
       add(:website, :string)
+      add(:o_actors, :string)
+      add(:o_plot, :string)
+      add(:o_director, :string)
+      add(:o_release_date, :string)
+      add(:o_runtime, :string)
+      add(:o_genre, :string)
 
       timestamps()
     end
