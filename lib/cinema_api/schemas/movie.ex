@@ -27,6 +27,12 @@ defmodule CinemaApi.Schemas.Movie do
     field(:box_office, :string)
     field(:production, :string)
     field(:website, :string)
+    field(:o_actors, :string)
+    field(:o_plot, :string)
+    field(:o_director, :string)
+    field(:o_release_date, :string)
+    field(:o_runtime, :string)
+    field(:o_genre, :string)
     timestamps()
   end
 

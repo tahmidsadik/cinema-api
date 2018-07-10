@@ -51,7 +51,7 @@ defmodule CinemaApi.Cineplex.Fetcher do
             info_markup
             |> Enum.at(0)
             |> Floki.text(),
-          releae_date:
+          release_date:
             info_markup
             |> Enum.at(1)
             |> Floki.text(),
@@ -135,7 +135,7 @@ defmodule CinemaApi.Cineplex.Fetcher do
   end
 
   @doc """
-  Saves the markup in disk for later uses. 
+  Saves the markup in disk for later uses.
   """
   def save_markup_file(content) do
     {:ok, file} = File.open("./priv/static/cine_info.html", [:write, :utf8])
@@ -145,7 +145,7 @@ defmodule CinemaApi.Cineplex.Fetcher do
 
   @doc """
   Gets cineplex movie markup from their website.
-  The timeouts are extended to 15 second cause sometimes it takes 
+  The timeouts are extended to 15 second cause sometimes it takes
   that long for their servers to respond.
   """
   def get_markup_from_network() do

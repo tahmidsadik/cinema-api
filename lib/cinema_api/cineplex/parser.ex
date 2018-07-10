@@ -41,14 +41,35 @@ defmodule CinemaApi.Cineplex.Parser do
   Returns equivalent elixir date.
   """
   def parse_release_date(release_date) do
-    [day | [month | [year | _]]] =
-      release_date
-      |> String.split()
+    # TODO: Fix this fucntion, add more checks like literal words instead of
+    # dates are provided
+    case String.contains?(release_date, "-") do
+      true ->
+        [day, month, year] = String.split(release_date, "-")
 
-    {:ok, date} =
-      Date.new(String.to_integer(year), parse_month_string_to_int(month), String.to_integer(day))
+        {:ok, date} =
+          Date.new(
+            String.to_integer(year),
+            String.to_integer(month),
+            String.to_integer(day)
+          )
 
-    date
+        date
+
+      false ->
+        [day | [month | [year | _]]] =
+          release_date
+          |> String.split()
+
+        {:ok, date} =
+          Date.new(
+            String.to_integer(year),
+            parse_month_string_to_int(month),
+            String.to_integer(day)
+          )
+
+        date
+    end
   end
 
   @doc """
@@ -191,7 +212,7 @@ defmodule CinemaApi.Cineplex.Parser do
   end
 
   @doc """
-  Creates a movie MAP from OMDB response 
+  Creates a movie MAP from OMDB response
   """
 
   def parse_cineplex_movies(markup) do
