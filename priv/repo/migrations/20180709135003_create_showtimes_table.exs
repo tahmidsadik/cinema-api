@@ -3,11 +3,11 @@ defmodule CinemaApi.Repo.Migrations.CreateShowtimesTable do
 
   def change do
     create table(:showtimes, primary_key: false) do
-      add(:id, :integer, primary_key: true)
-      add(:movie_title, :string, primary_key: true)
-      add(:showdate, :date, null: false)
-      add(:showtime, :time, null: false)
-      add(:cinema_hall, :string, null: false)
+      add(:id, :serial, primary_key: true)
+      add(:imdb_id, :string)
+      add(:title, :string, null: false)
+      add(:showtime, :utc_datetime, null: false)
+      add(:cinemahall, :string, null: false)
     end
   end
 end

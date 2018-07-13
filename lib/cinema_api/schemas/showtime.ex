@@ -6,19 +6,19 @@ defmodule CinemaApi.Schemas.Showtime do
   use Ecto.Schema
 
   schema "showtimes" do
-    field(:movie_tilte, :string)
-    field(:showdate, :date)
-    field(:showtime, :time)
-    field(:cinema_hall, :string)
+    field(:title, :string)
+    field(:imdb_id, :string)
+    field(:showtime, :utc_datetime)
+    field(:cinemahall, :string)
   end
 
   def changeset(showtime, attrs) do
     showtime
     |> cast(attrs, [
-      :movie_title,
-      :showdate,
+      :title,
+      :imdb_id,
       :showtime,
-      :cinema_hall
+      :cinemahall
     ])
   end
 end
