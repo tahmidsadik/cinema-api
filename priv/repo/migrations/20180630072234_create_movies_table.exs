@@ -3,7 +3,7 @@ defmodule CinemaApi.Repo.Migrations.CreateMoviesTable do
 
   def change do
     create table(:movies, primary_key: false) do
-      add(:id, :integer, primary_key: true)
+      add(:id, :serial, primary_key: true)
       add(:imdb_id, :string)
       add(:title, :string)
       add(:year, :string)
@@ -12,7 +12,7 @@ defmodule CinemaApi.Repo.Migrations.CreateMoviesTable do
       add(:genre, :string)
       add(:director, :string)
       add(:actors, :string)
-      add(:plot, :string)
+      add(:plot, :text)
       add(:poster, :string)
       add(:language, :string)
       add(:country, :string)
@@ -23,7 +23,7 @@ defmodule CinemaApi.Repo.Migrations.CreateMoviesTable do
       add(:production, :string)
       add(:website, :string)
       add(:o_actors, :string)
-      add(:o_plot, :string)
+      add(:o_plot, :text)
       add(:o_director, :string)
       add(:o_release_date, :string)
       add(:o_runtime, :string)
