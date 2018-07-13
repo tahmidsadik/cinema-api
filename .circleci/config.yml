@@ -19,6 +19,6 @@ jobs:
       - run: echo $GIT_CRYPT_SECRET | base64 -d > keyfile
       - run: git-crypt unlock keyfile
       - run: mix local.hex --force
-      - run: mix deps.get
+      - run: mix deps.get --force
       - run: mix ecto.create
       - run: mix test
