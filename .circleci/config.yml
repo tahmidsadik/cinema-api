@@ -18,9 +18,7 @@ jobs:
       - checkout
 
       - run: git clone https://github.com/AGWA/git-crypt.git
-      - run: cd git-crypt && ls && make
-      - run: make
-      - run: make install
+      - run: cd git-crypt && ls && make && make install
       - run: echo $GIT_CRYPT_SECRET | base64 -d > keyfile
       - run: git-crypt unlock keyfile
       - run: echo $GIT_CRYPT_SECRET
