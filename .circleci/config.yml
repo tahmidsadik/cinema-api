@@ -18,7 +18,7 @@ jobs:
       - checkout
       - run: echo $GIT_CRYPT_SECRET | base64 -d > keyfile
       - run: git-crypt unlock keyfile
-      - run: mix local.hex
+      - run: Y | mix local.hex
       - run: mix deps.get
       - run: mix ecto.create
       - run: mix test
