@@ -4,6 +4,7 @@ defmodule CinemaApi.Schemas.Movie do
   """
   import Ecto.Changeset
   use Ecto.Schema
+  alias CinemaApi.Schemas.Movie
 
   schema "movies" do
     field(:imdb_id, :string)
@@ -27,10 +28,16 @@ defmodule CinemaApi.Schemas.Movie do
     field(:box_office, :string)
     field(:production, :string)
     field(:website, :string)
+    field(:o_actors, :string)
+    field(:o_plot, :string)
+    field(:o_director, :string)
+    field(:o_release_date, :string)
+    field(:o_runtime, :string)
+    field(:o_genre, :string)
     timestamps()
   end
 
-  def changeset(movie, attrs) do
+  def changeset(%Movie{} = movie, attrs) do
     movie
     |> cast(attrs, [
       :imdb_id,
@@ -49,7 +56,14 @@ defmodule CinemaApi.Schemas.Movie do
       :media_type,
       :box_office,
       :production,
-      :website
+      :website,
+      :actors,
+      :o_actors,
+      :o_director,
+      :o_genre,
+      :o_plot,
+      :o_release_date,
+      :o_runtime
     ])
   end
 end

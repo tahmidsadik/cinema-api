@@ -3,7 +3,7 @@ defmodule CinemaApi.Repo.Migrations.CreateMoviesTable do
 
   def change do
     create table(:movies, primary_key: false) do
-      add(:id, :integer, primary_key: true)
+      add(:id, :serial, primary_key: true)
       add(:imdb_id, :string)
       add(:title, :string)
       add(:year, :string)
@@ -12,19 +12,22 @@ defmodule CinemaApi.Repo.Migrations.CreateMoviesTable do
       add(:genre, :string)
       add(:director, :string)
       add(:actors, :string)
-      add(:plot, :string)
+      add(:plot, :text)
       add(:poster, :string)
       add(:language, :string)
       add(:country, :string)
       add(:awards, :string)
       add(:imdb_rating, :string)
-      # TODO: Add this ratings later
-      # field(:rooten_tomatoes_rating, :string)
-      # field(:metacritic_rating, :string)
       add(:media_type, :string)
       add(:box_office, :string)
       add(:production, :string)
       add(:website, :string)
+      add(:o_actors, :string)
+      add(:o_plot, :text)
+      add(:o_director, :string)
+      add(:o_release_date, :string)
+      add(:o_runtime, :string)
+      add(:o_genre, :string)
 
       timestamps()
     end
