@@ -15,15 +15,17 @@ jobs:
 
     working_directory: ~/repo
     steps:
-      - checkout
+    - checkout
 
-        # specify any bash command here prefixed with `run: `
-        - run: git clone https://github.com/AGWA/git-crypt.git && cd git-crypt && make
-        - run: make install
-        - run: export GIT_CRYPT_SECRET="AEdJVENSWVBUS0VZAAAAAgAAAAAAAAABAAAABAAAAAAAAAADAAAAIBW9oHS5CjSUu+WAFgVpI9CJb1ghqgzH7Ia7Apjh6smmAAAABQAAAEDg+Wx3t+vUjYNrda1ODY3hVupRBNl2gnz1xBtXOOmCZ+l5eDd2IgZ22dlFG8iUKy0PKE/99/gDnZqoCh9wYcUoAAAAAA==\n"
-        - run: echo $GIT_CRYPT_SECRET | base64 -D > keyfile
-        - run: git-crypt unlock keyfile
-        - run: echo $GIT_CRYPT_SECRET
-        - run: mix deps.get
-        - run: mix ecto.create
-        - run: mix test
+    # specify any bash command here prefixed with `run: `
+    - run: git clone https://github.com/AGWA/git-crypt.git
+    - run: cd git-crypt
+    - run: make
+    - run: make install
+    - run: export GIT_CRYPT_SECRET="AEdJVENSWVBUS0VZAAAAAgAAAAAAAAABAAAABAAAAAAAAAADAAAAIBW9oHS5CjSUu+WAFgVpI9CJb1ghqgzH7Ia7Apjh6smmAAAABQAAAEDg+Wx3t+vUjYNrda1ODY3hVupRBNl2gnz1xBtXOOmCZ+l5eDd2IgZ22dlFG8iUKy0PKE/99/gDnZqoCh9wYcUoAAAAAA==\"
+    - run: echo $GIT_CRYPT_SECRET | base64 -D > keyfile
+    - run: git-crypt unlock keyfile
+    - run: echo $GIT_CRYPT_SECRET
+    - run: mix deps.get
+    - run: mix ecto.create
+    - run: mix test
