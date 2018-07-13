@@ -24,8 +24,9 @@ defmodule CinemaApi.DataProvider do
   def create_imdb_movie(responses) do
     responses
     |> map(fn r ->
-      IO.inspect(r)
-      release_date = if (r["Released"] == nil), do: r["original_info"].release_date, else: r["Released"]
+      release_date =
+        if r["Released"] == nil, do: r["original_info"].release_date, else: r["Released"]
+
       %{
         imdb_id: r["imdbID"],
         title: r["Title"],
@@ -54,7 +55,8 @@ defmodule CinemaApi.DataProvider do
         o_director: r["original_info"].director,
         o_release_date: r["original_info"].release_date,
         o_runtime: r["original_info"].runtime,
-        o_genre: r["original_info"].genre
+        o_genre: r["original_info"].genre,
+        cinemahall: "cineplex"
       }
     end)
   end
