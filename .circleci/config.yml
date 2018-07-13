@@ -21,7 +21,7 @@ jobs:
       - run: cd git-crypt
       # - run: make
       # - run: make install
-      - run: echo $GIT_CRYPT_SECRET | base64 -D > keyfile
+      - run: echo $GIT_CRYPT_SECRET | base64 -d > keyfile
       - run: git-crypt unlock keyfile
       - run: echo $GIT_CRYPT_SECRET
       - run: mix deps.get
