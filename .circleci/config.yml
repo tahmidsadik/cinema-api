@@ -7,6 +7,7 @@ jobs:
     docker:
       # specify the version here
       - image: tahmidsadik/mantra:0.0.1
+      - image: circleci/mysql:8.0.4
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -20,5 +21,6 @@ jobs:
       - run: git-crypt unlock keyfile
       - run: mix local.hex --force
       - run: mix deps.get --force
+      - run: mix local.rebar --force
       - run: mix ecto.create
       - run: mix test
