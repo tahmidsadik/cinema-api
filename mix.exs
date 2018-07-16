@@ -5,7 +5,7 @@ defmodule CinemaApi.Mixfile do
     [
       app: :cinema_api,
       version: "0.0.1",
-      elixir: "~> 1.4",
+      elixir: ">= 1.6.6",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -33,17 +33,17 @@ defmodule CinemaApi.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.3.0"},
-      {:phoenix_pubsub, "~> 1.0"},
-      {:phoenix_ecto, "~> 3.2"},
-      {:mariaex, ">= 0.0.0"},
-      {:phoenix_html, "~> 2.10"},
-      {:phoenix_live_reload, "~> 1.0", only: :dev},
-      {:gettext, "~> 0.11"},
+      {:phoenix, ">= 1.3.3"},
+      {:phoenix_pubsub, ">= 1.0.2"},
+      {:phoenix_ecto, ">= 3.3.0"},
+      {:phoenix_html, "~> 2.11"},
+      {:phoenix_live_reload, "~> 1.1", only: :dev},
+      {:gettext, "~> 0.15"},
       {:cowboy, "~> 1.0"},
-      {:httpoison, "~> 1.0"},
-      {:floki, "~> 0.20.0"},
-      {:credo, "~> 0.9.0-rc1", only: [:dev, :test], runtime: false}
+      {:httpoison, "~> 1.2"},
+      {:floki, ">= 0.20.3"},
+      {:credo, "~> 0.9.3", only: [:dev, :test], runtime: false},
+      {:postgrex, "~> 0.13.5"}
     ]
   end
 
