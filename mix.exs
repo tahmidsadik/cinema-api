@@ -6,9 +6,9 @@ defmodule CinemaApi.Mixfile do
       app: :cinema_api,
       version: "0.0.1",
       elixir: "~> 1.4",
-      elixirc_paths: elixirc_paths(Mix.env),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers,
-      start_permanent: Mix.env == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
     ]
@@ -19,13 +19,14 @@ defmodule CinemaApi.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {CinemaApi.Application, []}, extra_applications: [:logger, :runtime_tools]
+      mod: {CinemaApi.Application, []},
+      extra_applications: [:logger, :runtime_tools]
     ]
   end
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
   #
@@ -42,7 +43,6 @@ defmodule CinemaApi.Mixfile do
       {:cowboy, "~> 1.0"},
       {:httpoison, "~> 1.0"},
       {:floki, "~> 0.20.0"},
-      {:hackney, "~> 1.11"},
       {:credo, "~> 0.9.0-rc1", only: [:dev, :test], runtime: false}
     ]
   end
@@ -57,7 +57,7 @@ defmodule CinemaApi.Mixfile do
     [
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      "test": ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 end
