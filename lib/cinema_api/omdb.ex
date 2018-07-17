@@ -7,7 +7,8 @@ defmodule CinemaApi.OMDB do
   import Enum, only: [map: 2, filter: 2]
 
   def prepare_omdb_request_url_from_movie_names(uniq_movie_list) do
-    omdb_api_key = Application.get_env(:cinema_api, CinemaApi.CinemaInfoFetcher)[:omdb_api_key]
+    omdb_api_key = System.get_env("OMDB_API_KEY")
+    IO.inspect(omdb_api_key)
     omdb_url = "https://www.omdbapi.com/"
 
     uniq_movie_list
