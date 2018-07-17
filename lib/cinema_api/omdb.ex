@@ -1,7 +1,7 @@
 defmodule CinemaApi.OMDB do
   @moduledoc """
-  Provides functions for preparing and fetching 
-  IMDB data through OMDB API 
+  Provides functions for preparing and fetching
+  IMDB data through OMDB API
   """
 
   import Enum, only: [map: 2, filter: 2]
