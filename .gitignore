@@ -11,6 +11,7 @@
 /.idea/
 *.iml
 /priv/static/cine_info.html
+*.secret.exs
 
 
 # Generated on crash by the VM
