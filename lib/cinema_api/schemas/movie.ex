@@ -7,6 +7,7 @@ defmodule CinemaApi.Schemas.Movie do
   alias CinemaApi.Schemas.Movie
 
   schema "movies" do
+    has_many(:showtimes, CinemaApi.Schemas.Showtime)
     field(:imdb_id, :string)
     field(:title, :string)
     field(:year, :string)

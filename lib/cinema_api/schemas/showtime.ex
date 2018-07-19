@@ -5,7 +5,11 @@ defmodule CinemaApi.Schemas.Showtime do
   import Ecto.Changeset
   use Ecto.Schema
 
+  @primary_key {:id, :id, autogenerate: true}
+  @foreign_key_type :id
   schema "showtimes" do
+    belongs_to(:movies, CinemaApi.Schemas.Movie)
+    field(:movie_id, :id)
     field(:title, :string)
     field(:imdb_id, :string)
     field(:showtime, :utc_datetime)
@@ -16,6 +20,7 @@ defmodule CinemaApi.Schemas.Showtime do
     showtime
     |> cast(attrs, [
       :title,
+      :movie_id,
       :imdb_id,
       :showtime,
       :cinemahall
