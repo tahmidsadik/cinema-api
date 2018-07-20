@@ -14,6 +14,8 @@ defmodule CinemaApi.Schemas.Showtime do
     field(:imdb_id, :string)
     field(:showtime, :utc_datetime)
     field(:cinemahall, :string)
+
+    timestamps()
   end
 
   def changeset(showtime, attrs) do

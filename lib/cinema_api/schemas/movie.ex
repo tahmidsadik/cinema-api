@@ -66,5 +66,8 @@ defmodule CinemaApi.Schemas.Movie do
       :o_release_date,
       :o_runtime
     ])
+    |> unique_constraint(:title)
+    |> unique_constraint(:imdb_id)
+    |> cast_assoc(:showtimes, required: true)
   end
 end

@@ -9,6 +9,8 @@ defmodule CinemaApi.Repo.Migrations.CreateShowtimesTable do
       add(:title, :string, null: false)
       add(:showtime, :utc_datetime, null: false)
       add(:cinemahall, :string, null: false)
+
+      timestamps()
     end
 
     create(

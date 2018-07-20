@@ -31,5 +31,21 @@ defmodule CinemaApi.Repo.Migrations.CreateMoviesTable do
 
       timestamps()
     end
+
+    create(
+      unique_index(
+        :movies,
+        [:title],
+        name: "title-unique-key"
+      )
+    )
+
+    create(
+      unique_index(
+        :movies,
+        [imdb_id],
+        name: "imdbid-unique-key"
+      )
+    )
   end
 end
