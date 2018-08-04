@@ -43,7 +43,7 @@ defmodule CinemaApi.Repo.Migrations.CreateMoviesTable do
     create(
       unique_index(
         :movies,
-        [imdb_id],
+        [:imdb_id],
         name: "imdbid-unique-key"
       )
     )
