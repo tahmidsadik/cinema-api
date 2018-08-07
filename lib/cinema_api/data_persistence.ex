@@ -1,13 +1,13 @@
 defmodule CinemaApi.DataPersistence do
   @moduledoc """
-  provides functions for saving fetched movie data to database.
+  Provides functions to persist movies
+  TODO: Add tests. High Priority.
   """
-  import Enum, only: [map: 2, filter: 2, member?: 2]
+  import Enum, only: [map: 2, filter: 2, member?: 2, zip: 2]
   import Ecto.Query, only: [from: 2]
   alias CinemaApi.Repo
   alias CinemaApi.Schemas.Movie
   alias CinemaApi.Schemas.Showtime
-  # alias CinemaApi.Schemas.Showtime
 
   @doc """
   Persistence stretegy.
@@ -18,6 +18,9 @@ defmodule CinemaApi.DataPersistence do
   Insert only the new ones.
   # Fun and profit.
   """
+  @spec persist_movies([Movie.movie()]) :: [
+          {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
+        ]
   def persist_movies(movies) do
     movies_with_showtimes = merge_with_showtimes(movies)
 
@@ -27,7 +30,8 @@ defmodule CinemaApi.DataPersistence do
     persist_showtimes(new_showtimes)
   end
 
-  def merge_with_showtimes(movies) do
+  @spec merge_with_showtimes(list(Movie.movie())) :: list(Movie.movie())
+  defp merge_with_showtimes(movies) do
     movies
     |> map(fn mov ->
       Map.put(
@@ -35,22 +39,40 @@ defmodule CinemaApi.DataPersistence do
         :showtimes,
         mov.schedules
         |> map(fn showtime ->
-          %{title: mov.title, cinemahall: "cineplex", imdb_id: mov.imdb_id, showtime: showtime}
+          %{
+            title: mov.title,
+            cinemahall: "cineplex",
+            imdb_id: mov.imdb_id,
+            showtime: DateTime.from_naive!(showtime, "Etc/UTC")
+          }
         end)
       )
     end)
   end
 
-  def get_new_movies(movies) do
+  @spec get_saved_movies_with_injected_id([Movie.movie()]) :: [Movie.movie()]
+  defp get_saved_movies_with_injected_id(movies) do
+    movies
+    |> filter(&member?(get_saved_movie_titles(), &1.title))
+    |> map(&Map.put(&1, :id, Repo.get_by(Movie, title: &1.title).id))
+    |> map(
+      &Map.put(
+        &1,
+        :showtimes,
+        &1.showtimes |> map(fn showtime -> Map.put(showtime, :movie_id, &1.id) end)
+      )
+    )
+  end
+
+  @spec get_new_movies([Movie.movie()]) :: [Movie.movie()]
+  defp get_new_movies(movies) do
     movies
     |> filter(&(!member?(get_saved_movie_titles(), &1.title)))
   end
 
-  def get_new_showtimes(movies) do
-    saved_movies =
-      movies
-      |> filter(&member?(get_saved_movie_titles(), &1.title))
-
+  @spec get_new_showtimes([Movie.movie()]) :: [Movie.showtime()]
+  defp get_new_showtimes(movies) do
+    saved_movies = get_saved_movies_with_injected_id(movies)
     # list of showtimes from the provided movies
     fetched_showtimes = saved_movies |> map(fn m -> m.showtimes end) |> List.flatten()
     # fetch showtimes from db and checks if there are
@@ -62,12 +84,13 @@ defmodule CinemaApi.DataPersistence do
     |> filter(fn showtime ->
       !Enum.any?(showtimes_from_db, fn saved_st ->
         saved_st.title == showtime.title && saved_st.cinemahall == showtime.cinemahall &&
-          saved_st.showtime == showtime.showtime
+          DateTime.compare(saved_st.showtime, showtime.showtime) == :eq
       end)
     end)
   end
 
-  def get_saved_movie_titles() do
+  @spec get_saved_movie_titles() :: [String.t()]
+  defp get_saved_movie_titles() do
     query =
       from(
         m in Movie,
@@ -77,7 +100,10 @@ defmodule CinemaApi.DataPersistence do
     Repo.all(query)
   end
 
-  def get_saved_movie_showtimes_by_title(titles) do
+  @spec get_saved_movie_showtimes_by_title([String.t()]) :: [
+          %{title: String.t(), showtime: String.t(), cinemahall: String.t()}
+        ]
+  defp get_saved_movie_showtimes_by_title(titles) do
     query =
       from(
         s in Showtime,
@@ -88,13 +114,19 @@ defmodule CinemaApi.DataPersistence do
     Repo.all(query)
   end
 
-  def persist_new_movies(movies) do
+  @spec persist_new_movies([Movie.movie()]) :: [
+          {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
+        ]
+  defp persist_new_movies(movies) do
     movies
     |> map(fn mov -> Movie.changeset(%Movie{}, mov) end)
     |> map(fn cset -> Repo.insert(cset) end)
   end
 
-  def persist_showtimes(showtimes) do
+  @spec persist_showtimes([Movie.showtime()]) :: [
+          {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
+        ]
+  defp persist_showtimes(showtimes) do
     showtimes
     |> map(&Showtime.changeset(%Showtime{}, &1))
     |> map(&Repo.insert(&1))
