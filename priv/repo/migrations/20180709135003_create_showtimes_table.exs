@@ -1,10 +1,13 @@
 defmodule CinemaApi.Repo.Migrations.CreateShowtimesTable do
+  @moduledoc """
+  showtimes table migration
+  """
   use Ecto.Migration
 
   def change do
     create table(:showtimes, primary_key: false) do
       add(:id, :bigserial, primary_key: true)
-      add(:movie_id, references(:movies))
+      add(:movie_id, references(:movies), null: false)
       add(:imdb_id, :string)
       add(:title, :string, null: false)
       add(:showtime, :utc_datetime, null: false)
