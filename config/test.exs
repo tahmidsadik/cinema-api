@@ -12,7 +12,7 @@ config :logger, level: :warn
 # Configure your database
 config :cinema_api, CinemaApi.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
+  username: "tahmid",
   password: "",
   database: "cinema_api_test",
   hostname: "localhost",
