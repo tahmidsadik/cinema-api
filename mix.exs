@@ -43,7 +43,8 @@ defmodule CinemaApi.Mixfile do
       {:httpoison, "~> 1.2"},
       {:floki, ">= 0.20.3"},
       {:credo, "~> 0.9.3", only: [:dev, :test], runtime: false},
-      {:postgrex, "~> 0.13.5"}
+      {:postgrex, "~> 0.13.5"},
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false}
     ]
   end
 
