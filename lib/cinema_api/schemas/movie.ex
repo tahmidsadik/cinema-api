@@ -6,6 +6,41 @@ defmodule CinemaApi.Schemas.Movie do
   use Ecto.Schema
   alias CinemaApi.Schemas.Movie
 
+  @type showtime() :: %{
+          title: String.t(),
+          imdb_id: String.t(),
+          showtime: NaiveDateTime.t() | DateTime.t(),
+          cinemahall: String.t(),
+          movie_id: pos_integer()
+        }
+
+  @type movie() :: %{
+          imdb_id: String.t(),
+          title: String.t(),
+          year: String.t(),
+          release_date: String.t(),
+          runtime: String.t(),
+          genre: String.t(),
+          director: String.t(),
+          actors: String.t(),
+          plot: String.t(),
+          poster: String.t(),
+          language: String.t(),
+          country: String.t(),
+          awards: String.t(),
+          media_type: String.t(),
+          box_office: String.t(),
+          production: String.t(),
+          website: String.t(),
+          o_actors: String.t(),
+          o_plot: String.t(),
+          o_director: String.t(),
+          o_release_date: String.t(),
+          o_runtime: String.t(),
+          o_genre: String.t(),
+          showtimes: [NaiveDateTime.t()] | [showtime()]
+        }
+
   schema "movies" do
     has_many(:showtimes, CinemaApi.Schemas.Showtime)
     field(:imdb_id, :string)

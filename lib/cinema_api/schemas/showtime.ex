@@ -27,5 +27,6 @@ defmodule CinemaApi.Schemas.Showtime do
       :showtime,
       :cinemahall
     ])
+    |> unique_constraint(:movie_id, name: "mid-showtime-cinemahall-comp-key")
   end
 end
