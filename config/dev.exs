@@ -50,7 +50,7 @@ config :phoenix, :stacktrace_depth, 20
 # Configure your database
 config :cinema_api, CinemaApi.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "tahmid",
+  username: "postgres",
   password: "",
   database: "cinema_api_dev",
   hostname: "localhost",

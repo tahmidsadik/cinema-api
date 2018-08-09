@@ -3,7 +3,7 @@ defmodule CinemaApi.DataPersistence do
   Provides functions to persist movies
   TODO: Add tests. High Priority.
   """
-  import Enum, only: [map: 2, filter: 2, member?: 2, zip: 2]
+  import Enum, only: [map: 2, filter: 2, member?: 2]
   import Ecto.Query, only: [from: 2]
   alias CinemaApi.Repo
   alias CinemaApi.Schemas.Movie

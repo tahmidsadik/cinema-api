@@ -14,6 +14,7 @@ defmodule CinemaApi.Application do
       supervisor(CinemaApiWeb.Endpoint, []),
       # Start your own worker by calling: CinemaApi.Worker.start_link(arg1, arg2, arg3)
       # worker(CinemaApi.Worker, [arg1, arg2, arg3]),
+      supervisor(CinemaApi.DataUpdateScheduler, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

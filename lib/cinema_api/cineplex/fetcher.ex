@@ -83,7 +83,7 @@ defmodule CinemaApi.Cineplex.Fetcher do
 
   def get_markup(url) do
     headers = []
-    options = [timeout: 15_000, recv_timeout: 15_000]
+    options = [timeout: 20_000, recv_timeout: 20_000]
 
     case HTTPoison.get(url, headers, options) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
@@ -155,14 +155,12 @@ defmodule CinemaApi.Cineplex.Fetcher do
 
     case HTTPoison.get(url, headers, options) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        save_markup_file(body)
         {:ok, body}
 
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         {:err, "Couldn't find the requested resource"}
 
       {:error, %HTTPoison.Error{reason: reason}} ->
-        IO.puts(reason)
         {:err, reason}
     end
   end
