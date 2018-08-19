@@ -43,32 +43,38 @@ defmodule CinemaApi.Cineplex.Parser do
   def parse_release_date(release_date) do
     # TODO: Fix this fucntion, add more checks like literal words instead of
     # dates are provided
-    case String.contains?(release_date, "-") do
-      true ->
-        [day, month, year] = String.split(release_date, "-")
+    case release_date do
+      "" ->
+        nil
 
-        {:ok, date} =
-          Date.new(
-            String.to_integer(year),
-            String.to_integer(month),
-            String.to_integer(day)
-          )
+      n ->
+        case String.contains?(n, "-") do
+          true ->
+            [day, month, year] = String.split(release_date, "-")
 
-        date
+            {:ok, date} =
+              Date.new(
+                String.to_integer(year),
+                String.to_integer(month),
+                String.to_integer(day)
+              )
 
-      false ->
-        [day | [month | [year | _]]] =
-          release_date
-          |> String.split()
+            date
 
-        {:ok, date} =
-          Date.new(
-            String.to_integer(year),
-            parse_month_string_to_int(month),
-            String.to_integer(day)
-          )
+          false ->
+            [day | [month | [year | _]]] =
+              n
+              |> String.split()
 
-        date
+            {:ok, date} =
+              Date.new(
+                String.to_integer(year),
+                parse_month_string_to_int(month),
+                String.to_integer(day)
+              )
+
+            date
+        end
     end
   end
 
@@ -120,8 +126,17 @@ defmodule CinemaApi.Cineplex.Parser do
 
     hour =
       case time_period do
-        "AM" -> at(t, 0) |> String.to_integer()
-        "PM" -> at(t, 0) |> String.to_integer() |> Kernel.+(12)
+        "AM" ->
+          case at(t, 0) do
+            "12" -> 0
+            n -> String.to_integer(n) |> Kernel.+(12)
+          end
+
+        "PM" ->
+          case at(t, 0) do
+            "12" -> 12
+            n -> String.to_integer(n) + 12
+          end
       end
 
     minute = at(t, 1) |> String.to_integer()
@@ -161,10 +176,10 @@ defmodule CinemaApi.Cineplex.Parser do
         |> map(fn time ->
           t = normalize_time_format(time)
 
-          {:ok, show_time} =
+          {:ok, showtime} =
             NaiveDateTime.new(date.year, date.month, date.day, t.hour, t.minute, t.second)
 
-          show_time
+          showtime
         end)
       end)
     end)

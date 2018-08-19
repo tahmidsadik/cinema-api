@@ -17,7 +17,7 @@ defmodule CinemaApi.OMDB do
 
   def fetch_parallel(list_of_urls) do
     list_of_urls
-    |> map(& Task.async(fn -> HTTPoison.get(&1) end))
+    |> map(&Task.async(fn -> HTTPoison.get(&1) end))
     |> map(&Task.await(&1, 15000))
     |> map(fn response ->
       case response do

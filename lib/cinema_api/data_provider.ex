@@ -27,9 +27,11 @@ defmodule CinemaApi.DataProvider do
       release_date =
         if r["Released"] == nil, do: r["original_info"].release_date, else: r["Released"]
 
+      title = if r["Title"] == nil, do: r["cineplex_title"], else: r["Title"]
+
       %{
         imdb_id: r["imdbID"],
-        title: r["Title"],
+        title: title,
         year: r["Year"],
         release_date: parse_release_date(release_date),
         runtime: r["Runtime"],
