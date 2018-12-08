@@ -33,18 +33,20 @@ defmodule CinemaApi.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, ">= 1.3.3"},
-      {:phoenix_pubsub, ">= 1.0.2"},
-      {:phoenix_ecto, ">= 3.3.0"},
+      {:phoenix, "~> 1.4"},
+      {:phoenix_pubsub, "~> 1.1"},
+      {:phoenix_ecto, "~> 4.0"},
       {:phoenix_html, "~> 2.11"},
-      {:phoenix_live_reload, "~> 1.1", only: :dev},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.15"},
-      {:cowboy, "~> 1.0"},
+      {:cowboy, "~> 2.0"},
       {:httpoison, "~> 1.2"},
       {:floki, ">= 0.20.3"},
       {:credo, "~> 0.9.3", only: [:dev, :test], runtime: false},
-      {:postgrex, "~> 0.13.5"},
-      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false}
+      {:postgrex, "~> 0.14.1"},
+      {:ecto_sql, "~> 3.0"},
+      {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
+      {:plug_cowboy, "~> 2.0"}
     ]
   end
 

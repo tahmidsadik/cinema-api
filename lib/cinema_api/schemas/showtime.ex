@@ -8,7 +8,6 @@ defmodule CinemaApi.Schemas.Showtime do
   @primary_key {:id, :id, autogenerate: true}
   @foreign_key_type :id
   schema "showtimes" do
-    belongs_to(:movies, CinemaApi.Schemas.Movie)
     field(:movie_id, :id)
     field(:title, :string)
     field(:imdb_id, :string)

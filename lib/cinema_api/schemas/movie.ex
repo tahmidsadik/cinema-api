@@ -42,7 +42,6 @@ defmodule CinemaApi.Schemas.Movie do
         }
 
   schema "movies" do
-    has_many(:showtimes, CinemaApi.Schemas.Showtime)
     field(:imdb_id, :string)
     field(:title, :string)
     field(:year, :string)
@@ -70,6 +69,8 @@ defmodule CinemaApi.Schemas.Movie do
     field(:o_release_date, :string)
     field(:o_runtime, :string)
     field(:o_genre, :string)
+    has_many(:showtimes, CinemaApi.Schemas.Showtime, foreign_key: :movie_id, references: :id)
+
     timestamps()
   end
 
