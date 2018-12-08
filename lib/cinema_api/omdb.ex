@@ -95,6 +95,6 @@ defmodule CinemaApi.OMDB do
   def parse_response(responses) do
     responses
     |> filter(fn response -> !response.error end)
-    |> map(fn response -> Poison.decode!(response.body) end)
+    |> map(fn response -> Jason.decode!(response.body) end)
   end
 end

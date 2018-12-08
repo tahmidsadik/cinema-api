@@ -5,6 +5,8 @@
 # is restricted to this project.
 use Mix.Config
 
+config :phoenix, :json_library, Jason
+
 # General application configuration
 config :cinema_api,
   ecto_repos: [CinemaApi.Repo]
@@ -14,8 +16,7 @@ config :cinema_api, CinemaApiWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "PqXLtcZuobKhNZQysby1p4yhj0pfy9JPBLJoJQLcL9BG6V0iK4RcbCgHKS3yrpCt",
   render_errors: [view: CinemaApiWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: CinemaApi.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: CinemaApi.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -24,4 +25,4 @@ config :logger, :console,
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"
