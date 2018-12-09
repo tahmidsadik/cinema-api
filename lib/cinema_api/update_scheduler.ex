@@ -1,5 +1,6 @@
 defmodule CinemaApi.DataUpdateScheduler do
   use Task
+
   @moduledoc """
   Provides functions for schedule tasks to execute periodically.
   """
@@ -13,9 +14,10 @@ defmodule CinemaApi.DataUpdateScheduler do
   @spec poll() :: no_return()
   def poll() do
     IO.puts("Task polling...")
+
     receive do
     after
-      1000 * 60 * 1 ->
+      1000 * 60 * 60 * 24 ->
         update_movie_data()
         poll()
     end
