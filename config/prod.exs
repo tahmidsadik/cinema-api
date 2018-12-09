@@ -15,7 +15,7 @@ use Mix.Config
 # which you typically run after static files are built.
 config :cinema_api, CinemaApiWeb.Endpoint,
   http: [port: {:system, "PORT"}],
-  url: [host: "localhost", port: {:system, "PORT"}],
+  url: [host: "207.148.105.155", port: {:system, "PORT"}],
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
   root: ".",
