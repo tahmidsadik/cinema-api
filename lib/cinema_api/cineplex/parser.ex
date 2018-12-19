@@ -37,6 +37,23 @@ defmodule CinemaApi.Cineplex.Parser do
   end
 
   @doc """
+  takes a string and substring and returns how many times that string appears
+  in that string
+  iex > substr_frequency("14-Dec-2018", "-")
+  iex > 2
+  iex > substr_frequency("14 Dec 2018", "-")
+  iex > 0
+  """
+  def substr_frequency(str, search_term) do
+    len =
+      str
+      |> String.split(search_term)
+      |> Enum.count()
+
+    len - 1
+  end
+
+  @doc """
   takes a date in string format. Format is  "23 May 2018".
   Returns equivalent elixir date.
   """
@@ -45,6 +62,9 @@ defmodule CinemaApi.Cineplex.Parser do
     # dates are provided
     case release_date do
       "" ->
+        nil
+
+      "N/A" ->
         nil
 
       n ->

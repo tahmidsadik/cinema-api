@@ -49,7 +49,8 @@ defmodule CinemaApi.Mixfile do
       {:dialyxir, "~> 1.0.0-rc.3", only: [:dev], runtime: false},
       {:plug_cowboy, "~> 2.0"},
       {:plug, "~> 1.7"},
-      {:distillery, "~> 2.0"}
+      {:distillery, "~> 2.0"},
+      {:timex, "~> 3.1"}
     ]
   end
 
