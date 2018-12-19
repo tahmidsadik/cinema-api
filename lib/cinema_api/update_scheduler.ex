@@ -17,7 +17,7 @@ defmodule CinemaApi.DataUpdateScheduler do
 
     receive do
     after
-      1000 * 60 * 60 * 24 ->
+      1000 * 60 * 60 ->
         update_movie_data()
         poll()
     end
