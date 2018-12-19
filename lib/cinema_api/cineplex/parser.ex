@@ -4,6 +4,7 @@ defmodule CinemaApi.Cineplex.Parser do
   """
   import Enum, only: [map: 2, filter: 2, at: 2, count: 1, into: 2, zip: 2, uniq: 1, slice: 2]
   import List, only: [foldl: 3]
+  import Timex, only: [parse: 2, parse: 3]
 
   import CinemaApi.Cineplex.Fetcher,
     only: [
@@ -67,21 +68,33 @@ defmodule CinemaApi.Cineplex.Parser do
       "N/A" ->
         nil
 
+      "Coming Soon" ->
+        nil
+
       n ->
-        case String.contains?(n, "-") do
-          true ->
+        case n |> substr_frequency("-") do
+          2 ->
             [day, month, year] = String.split(release_date, "-")
+            day = String.trim(day)
+            month = String.trim(month)
+            year = String.trim(year)
+            trimmed_rdate = day <> "-" <> month <> "-" <> year
 
-            {:ok, date} =
-              Date.new(
-                String.to_integer(year),
-                String.to_integer(month),
-                String.to_integer(day)
-              )
+            case String.length(year) do
+              2 ->
+                {:ok, date} = Timex.parse(trimmed_rdate, "%d-%m-%y", :strftime)
+                date
 
+              4 ->
+                {:ok, date} = Timex.parse(trimmed_rdate, "%d-%m-%Y", :strftime)
+                date
+            end
+
+          1 ->
+            {:ok, date} = Timex.parse(n, "%d %b-%Y", :strftime)
             date
 
-          false ->
+          0 ->
             [day | [month | [year | _]]] =
               n
               |> String.split()
