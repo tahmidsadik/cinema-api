@@ -26,5 +26,7 @@ defmodule CinemaApi.DataUpdateScheduler do
   def update_movie_data() do
     CinemaApi.DataProvider.get_cineplex_movies_with_omdb_data()
     |> CinemaApi.DataPersistence.persist_movies()
+
+    IO.puts("Updated new movies")
   end
 end
